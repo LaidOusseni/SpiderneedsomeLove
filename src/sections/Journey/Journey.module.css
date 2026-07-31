@@ -1,0 +1,307 @@
+.journey {
+  position: relative;
+  background-color: var(--color-red);
+  padding: var(--space-3xl) var(--section-px) var(--space-4xl);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* ── Gif Spider-Man — haut à droite, quasi pleine hauteur ── */
+.spiderman {
+  position: absolute;
+  top: 0;
+  right: 0;
+  /* Quasiment toute la hauteur visible sans cacher les cartes */
+  height: 170vh;
+  width: auto;
+  pointer-events: none;
+  opacity: 0.88;
+  object-fit: contain;
+  object-position: top right;
+}
+
+.container {
+  max-width: 780px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3xl);
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  margin-top: var(--space-xl);
+  /* Donne de l'espace à droite pour que Spider-Man ne chevauche pas le texte */
+}
+
+.title {
+  font-family: var(--font-title);
+  font-size: clamp(1.8rem, 4.5vw, 3.5rem);
+  color: var(--color-white);
+  letter-spacing: 0.04em;
+  text-shadow: var(--shadow-comic-md);
+}
+
+/* ── Socials — 3 cartes alignées ── */
+.socials {
+  display: flex;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.socialLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  background-color: var(--color-blue);
+  border: 2px solid var(--color-black);
+  border-radius: var(--radius-xl);
+  padding: var(--space-md) var(--space-xl);
+  box-shadow: var(--shadow-comic-md);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  min-width: 140px;
+  flex: 1 1 140px;
+  /* s'étire proprement sur 1, 2 ou 3 colonnes */
+  max-width: 200px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.socialLink:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-comic-lg);
+}
+
+.socialLabel {
+  font-family: var(--font-title);
+  font-size: 1.4rem;
+  color: var(--color-white);
+  letter-spacing: 0.04em;
+}
+
+.socialHandle {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.85);
+  word-break: break-all;
+}
+
+/* ── Compteur communautaire ── */
+.counterCard {
+  width: 100%;
+  max-width: 500px;
+  background-color: var(--color-yellow);
+  border: 3px solid var(--color-black);
+  border-radius: var(--radius-xl);
+  box-shadow: 5px 5px 0 var(--color-black);
+  padding: var(--space-lg) var(--space-2xl);
+  text-align: center;
+}
+
+.counterText {
+  font-family: var(--font-title);
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  color: var(--color-black);
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+}
+
+.counterLoading {
+  animation: pulse 1.2s ease-in-out infinite;
+  font-size: 1.5rem;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* ── Newsletter ── */
+.newsletter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+}
+
+.newsletterLabel {
+  font-style: italic;
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.emailForm {
+  display: flex;
+  gap: var(--space-sm);
+  width: 100%;
+  max-width: 460px;
+}
+
+.emailInput {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  border: 2px solid var(--color-black);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-white);
+  color: var(--color-black);
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.emailInput:focus {
+  border-color: var(--color-yellow);
+  box-shadow: var(--shadow-comic-sm);
+}
+
+.emailBtn {
+  padding: var(--space-sm) var(--space-lg);
+  background-color: var(--color-yellow);
+  color: var(--color-black);
+  font-weight: 700;
+  font-style: italic;
+  border: 2px solid var(--color-black);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-comic-sm);
+  transition: transform var(--transition-fast);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.emailBtn:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-comic-md);
+}
+
+.emailBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.successMsg {
+  font-weight: 700;
+  color: var(--color-yellow);
+  font-size: 1.1rem;
+}
+
+.newsError {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--color-yellow);
+  background-color: rgba(0, 0, 0, 0.35);
+  border-radius: var(--radius-md);
+  padding: var(--space-xs) var(--space-md);
+  text-align: center;
+}
+
+/* ── App teaser ── */
+.appTeaser {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  background-color: rgba(0, 0, 0, 0.25);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl) var(--space-2xl);
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.exclamation {
+  width: 48px;
+  flex-shrink: 0;
+}
+
+.appTitle {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--color-yellow);
+  margin-bottom: var(--space-xs);
+}
+
+.appDesc {
+  font-size: 0.9rem;
+  color: var(--color-white);
+  line-height: 1.7;
+}
+
+/* ── Logo ── */
+.logoWrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.logo {
+  width: clamp(80px, 16vw, 160px);
+  opacity: 0.85;
+}
+
+/* ═══════════════════════════════
+   RESPONSIVE — MOBILE
+   ═══════════════════════════════ */
+@media (max-width: 768px) {
+  .journey {
+    padding: var(--space-2xl) var(--space-md) var(--space-3xl);
+  }
+
+  /* Spider-Man : réduit mais encore présent, ne gêne pas */
+  .spiderman {
+    height: 110vh;
+    max-width: 100vw;
+    opacity: 0.7;
+  }
+
+  /* Container : pas de padding droit sur mobile */
+  .container {
+    padding-right: 0;
+    gap: var(--space-2xl);
+  }
+
+  /* Cartes sociales en colonne sur petit écran */
+  .socials {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .socialLink {
+    width: 100%;
+    max-width: 320px;
+    flex: none;
+  }
+
+  .counterCard {
+    max-width: 100%;
+  }
+
+  .emailForm {
+    flex-direction: column;
+  }
+
+  .appTeaser {
+    flex-direction: column;
+    text-align: center;
+    padding: var(--space-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.6rem;
+  }
+}

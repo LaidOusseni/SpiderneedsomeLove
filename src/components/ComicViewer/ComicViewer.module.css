@@ -1,0 +1,220 @@
+.viewer {
+  display: flex;
+  gap: var(--space-xl);
+  padding: var(--space-3xl) var(--section-px);
+  background-color: var(--color-red);
+  animation: fadeIn var(--transition-slow) ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── LEFT ── */
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  flex: 0 0 42%;
+  max-width: 42%;
+}
+
+.images {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.imgWrapper {
+  flex: 1;
+  border: 3px solid var(--color-black);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-comic-md);
+  overflow: hidden;
+}
+
+.imgWrapper img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.descriptionBox {
+  background-color: rgba(200, 160, 160, 0.25);
+  border: 2px solid var(--color-black);
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg) var(--space-xl);
+  box-shadow: var(--shadow-comic-sm);
+}
+
+.descriptionTitle {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--color-white);
+  margin-bottom: var(--space-sm);
+}
+
+.descriptionText {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--color-white);
+  line-height: 1.6;
+}
+
+/* ── RIGHT ── */
+.right {
+  flex: 1;
+}
+
+.formPanel {
+  background-color: var(--color-blue);
+  border: 3px solid var(--color-black);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-comic-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* Form panel custom scrollbar */
+.formPanel::-webkit-scrollbar { width: 10px; }
+.formPanel::-webkit-scrollbar-track { background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); }
+.formPanel::-webkit-scrollbar-thumb { background: var(--color-black); border-radius: var(--radius-sm); }
+
+.logoRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+}
+
+.logo {
+  height: 60px;
+  width: auto;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.row3 {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.row3 > * {
+  flex: 1;
+  min-width: 120px;
+}
+
+/* Sizes */
+.sizeSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.sizeLabel {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--color-black);
+}
+
+.sizeNote {
+  font-weight: 400;
+  font-style: italic;
+  font-size: 0.8rem;
+}
+
+.sizeGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  background-color: rgba(255,255,255,0.25);
+  border: 2px solid var(--color-black);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+}
+
+/* Scrollable text zone */
+.scrollZone {
+  height: 140px;
+  overflow-y: scroll;
+  background-color: rgba(255,255,255,0.2);
+  border: 2px solid var(--color-black);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  outline: none;
+}
+
+.scrollZone::-webkit-scrollbar { width: 8px; }
+.scrollZone::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+.scrollZone::-webkit-scrollbar-thumb { background: var(--color-black); border-radius: var(--radius-sm); }
+
+.scrollText {
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: var(--color-black);
+  white-space: pre-line;
+}
+
+/* Submit */
+.submitRow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.scrollHint {
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--color-black);
+  opacity: 0.7;
+}
+
+/* Message d'erreur soumission */
+.submitError {
+  font-size: 0.8rem;
+  font-style: italic;
+  font-weight: 600;
+  color: #8E0E12;
+  background-color: rgba(255, 255, 255, 0.85);
+  border: 2px solid #8E0E12;
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  text-align: center;
+  max-width: 320px;
+}
+
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .viewer {
+    flex-direction: column;
+  }
+
+  .left {
+    flex: none;
+    max-width: 100%;
+  }
+
+  .formPanel {
+    max-height: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .row3 {
+    flex-direction: column;
+  }
+}

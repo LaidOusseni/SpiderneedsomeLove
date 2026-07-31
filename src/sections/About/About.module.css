@@ -1,0 +1,108 @@
+.about {
+  position: relative;
+  background-color: var(--color-red);
+  padding: var(--space-3xl) var(--section-px) var(--space-4xl);
+  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.container {
+  max-width: 800px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.mainTitle {
+  font-family: var(--font-title);
+  font-size: clamp(2rem, 7vw, 5rem);
+  color: var(--color-white);
+  letter-spacing: 0.05em;
+  text-shadow: var(--shadow-comic-lg);
+  margin-bottom: var(--space-3xl);
+  line-height: 1;
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
+}
+
+.item {
+  background-color: rgba(0, 0, 0, 0.25);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl) var(--space-2xl);
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.question {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-style: italic;
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  color: var(--color-yellow);
+  margin-bottom: var(--space-md);
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+.answer {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: clamp(0.85rem, 1.8vw, 1rem);
+  color: var(--color-white);
+  line-height: 1.8;
+}
+
+/* Decorative sparkles */
+.sparkleTop,
+.sparkleBottom {
+  position: absolute;
+  width: clamp(60px, 10vw, 160px);
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sparkleTop {
+  top: var(--space-xl);
+  right: var(--space-xl);
+}
+
+.sparkleBottom {
+  bottom: var(--space-xl);
+  left: var(--space-xl);
+  transform: rotate(180deg);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .about {
+    padding: var(--space-2xl) var(--space-md) var(--space-3xl);
+  }
+
+  .mainTitle {
+    font-size: clamp(1.6rem, 8vw, 2.5rem);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .item {
+    padding: var(--space-lg);
+  }
+
+  .question {
+    font-size: 1rem;
+  }
+
+  .answer {
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+}

@@ -1,0 +1,61 @@
+:root {
+  /* ===== PALETTE ===== */
+  --color-red: #8E0E12;
+  --color-blue: #82A7F8;
+  --color-yellow: #FFD633;
+  --color-black: #111111;
+  --color-white: #FFFFFF;
+
+  /* Semantic */
+  --bg-primary: var(--color-red);
+  --bg-form: var(--color-blue);
+  --bg-popup: var(--color-yellow);
+  --text-primary: var(--color-white);
+  --text-dark: var(--color-black);
+
+  /* ===== SHADOWS ===== */
+  --shadow-comic-sm: 2px 2px 0 var(--color-black);
+  --shadow-comic-md: 4px 4px 0 var(--color-black);
+  --shadow-comic-lg: 6px 6px 0 var(--color-black);
+
+  /* ===== SPACING ===== */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --space-4xl: 96px;
+
+  /* ===== BORDER RADIUS ===== */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-pill: 9999px;
+
+  /* ===== Z-INDEX ===== */
+  --z-base: 0;
+  --z-above: 10;
+  --z-header: 100;
+  --z-modal-bg: 900;
+  --z-modal: 1000;
+  --z-popup: 1100;
+
+  /* ===== TRANSITIONS ===== */
+  --transition-fast: 150ms ease;
+  --transition-base: 300ms ease;
+  --transition-slow: 600ms ease;
+  --transition-page: 800ms ease;
+
+  /* ===== TYPOGRAPHY ===== */
+  --font-title: 'Bangers', cursive;
+  --font-body: 'Poppins', sans-serif;
+
+  /* ===== LAYOUT ===== */
+  --max-width: 1400px;
+  --section-px: clamp(16px, 4vw, 64px);
+  --section-py: clamp(32px, 5vw, 80px);
+}

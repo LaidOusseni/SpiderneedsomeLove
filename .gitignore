@@ -1,0 +1,19 @@
+# .gitignore — Love&Faith Spider
+# Variables d'environment — NE JAMAIS commiter
+.env
+.env.local
+.env.*.local
+
+# Dépendances
+node_modules/
+
+# Build
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

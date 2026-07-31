@@ -1,0 +1,25 @@
+.collection {
+  background-color: var(--color-red);
+  padding: var(--space-3xl) var(--section-px);
+  min-height: 100vh;
+}
+
+.covers {
+  display: flex;
+  justify-content: center;
+  gap: clamp(var(--space-xl), 6vw, var(--space-4xl));
+  flex-wrap: wrap;
+  padding: 0 var(--space-xl);
+}
+
+@media (max-width: 768px) {
+  .collection {
+    padding: var(--space-2xl) var(--space-md);
+  }
+
+  .covers {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2xl);
+  }
+}

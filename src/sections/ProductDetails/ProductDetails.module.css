@@ -1,0 +1,11 @@
+.page {
+  background-color: var(--color-red);
+  padding: var(--space-3xl) var(--section-px);
+  min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: var(--space-2xl) var(--space-md);
+  }
+}
