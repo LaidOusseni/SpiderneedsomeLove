@@ -87,19 +87,32 @@
   font-family: var(--font-body);
   font-weight: 700;
   font-style: italic;
-  font-size: clamp(1rem, 2vw, 1.3rem);
+  /* Plus grand et plus visible — vrai CTA visuel */
+  font-size: clamp(1.7rem, 4.5vw, 3rem);
   color: var(--color-white);
   background: none;
   border: none;
-  cursor: pointer;
-  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
-  letter-spacing: 0.04em;
-  transition: opacity var(--transition-fast);
+  cursor: inherit;           /* hérite du pointer de la section */
+  text-shadow: 2px 2px 12px rgba(0, 0, 0, 0.9);
+  letter-spacing: 0.06em;
   padding: var(--space-sm) 0;
+  pointer-events: none;      /* le clic est géré par la section */
+  /* Légère animation pour attirer l'attention */
+  animation: ctaPulse 2.5s ease-in-out infinite;
 }
 
-.discoverBtn:hover {
-  opacity: 0.8;
+@keyframes ctaPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.65; }
+}
+
+/* Section en phase logo — tout l'écran est cliquable */
+.heroClickable {
+  cursor: pointer;
+}
+
+.heroClickable:focus {
+  outline: none;
 }
 
 /* ── RESPONSIVE ── */

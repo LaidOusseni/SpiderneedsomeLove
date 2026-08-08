@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Hero.module.css';
+import PreorderPopup from '../../components/PreorderPopup/PreorderPopup';
 
 /**
  * Section 1 — Hero
@@ -15,7 +16,23 @@ import styles from './Hero.module.css';
 const Hero = () => {
   const navigate = useNavigate();
   const [phase, setPhase] = useState('intro');
+  const [showPopup, setShowPopup] = useState(false);
   const modelContainerRef = useRef(null);
+  // Anti-double-trigger : on ignore tout appel après le premier
+  const hasShownPopup = useRef(false);
+
+  // Ouvre le popup (appelé par clic/tap/touche sur l'intro)
+  const goToCollection = useCallback(() => {
+    if (hasShownPopup.current) return;
+    hasShownPopup.current = true;
+    setShowPopup(true);
+  }, []);
+
+  // Navigation réelle après fermeture du popup
+  const handlePopupClose = useCallback(() => {
+    setShowPopup(false);
+    navigate('/collection', { state: { fromIntro: true } });
+  }, [navigate]);
 
   // Phase sequence: intro → fading → logo
   useEffect(() => {
@@ -26,6 +43,19 @@ const Hero = () => {
       clearTimeout(t2);
     };
   }, []);
+
+  // Clavier : Enter ou Space n'importe quand après la phase logo
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (phase !== 'logo') return;
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        goToCollection();
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [phase, goToCollection]);
 
   // Mount <model-viewer> imperatively (React 18 custom element compatibility)
   useEffect(() => {
@@ -52,42 +82,55 @@ const Hero = () => {
   }, []);
 
   return (
-    <section className={styles.hero} id="hero">
-      {/* Background video */}
-      <video
-        className={styles.video}
-        autoPlay
-        muted
-        loop
-        playsInline
-        aria-hidden="true"
+    <>
+      {/* Toute la section est cliquable/tappable quand phase === 'logo' */}
+      <section
+        className={`${styles.hero} ${phase === 'logo' ? styles.heroClickable : ''}`}
+        id="hero"
+        onClick={phase === 'logo' ? goToCollection : undefined}
+        role={phase === 'logo' ? 'button' : undefined}
+        tabIndex={phase === 'logo' ? 0 : undefined}
+        aria-label={phase === 'logo' ? "Accéder au site Love & Faith" : undefined}
       >
-        <source src="/Intro/Fond intro.mp4" type="video/mp4" />
-      </video>
-
-      <div className={styles.overlay}>
-        {/* Phase: texte d'intro */}
-        <div
-          className={`${styles.introText} ${phase === 'fading' ? styles.fadeOut : ''} ${phase === 'logo' ? styles.hidden : ''}`}
+        {/* Background video */}
+        <video
+          className={styles.video}
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-hidden="true"
         >
-          <p>Un grand amour</p>
-          <p>vient avec de grandes responsabilités</p>
-        </div>
+          <source src="/Intro/Fond intro.mp4" type="video/mp4" />
+        </video>
 
-        {/* Phase: logo 3D + bouton */}
-        <div className={`${styles.logoContent} ${phase === 'logo' ? styles.fadeIn : ''}`}>
-          {/* Container pour model-viewer monté via useEffect */}
-          <div ref={modelContainerRef} className={styles.modelContainer} />
-
-          <button
-            className={styles.discoverBtn}
-            onClick={() => navigate('/collection')}
+        <div className={styles.overlay}>
+          {/* Phase: texte d'intro */}
+          <div
+            className={`${styles.introText} ${phase === 'fading' ? styles.fadeOut : ''} ${phase === 'logo' ? styles.hidden : ''}`}
           >
-            Découvrir notre pouvoir
-          </button>
+            <p>Un grand amour</p>
+            <p>vient avec de grandes responsabilités</p>
+          </div>
+
+          {/* Phase: logo 3D + bouton */}
+          <div className={`${styles.logoContent} ${phase === 'logo' ? styles.fadeIn : ''}`}>
+            {/* Container pour model-viewer monté via useEffect */}
+            <div ref={modelContainerRef} className={styles.modelContainer} />
+
+            <div
+              className={styles.discoverBtn}
+              aria-hidden="true"
+            >
+              Découvrir notre pouvoir
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* Popup précommandes — s'affiche après l'intro, avant le site */}
+      <PreorderPopup isOpen={showPopup} onClose={handlePopupClose} />
+    </>
   );
 };
 
