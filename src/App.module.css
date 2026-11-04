@@ -1,17 +1,58 @@
-/* Page transition — new page slides in from the right, discreet comic-book feel */
-.page {
+/* Entrée dans le site : prolonge le noir de la transition d'intro */
+.site {
   min-height: 100vh;
-  animation: pageSlideIn 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-  overflow-x: hidden;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(118, 0, 0, 0.45), transparent 70%),
+    var(--bg-primary);
+  animation: siteIn 0.9s ease both;
 }
 
-@keyframes pageSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(60px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+@keyframes siteIn {
+  from { opacity: 0; filter: brightness(0.2); }
+  to { opacity: 1; filter: none; }
 }
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 2;
+}
+
+.skip {
+  position: absolute;
+  left: 8px;
+  top: -60px;
+  z-index: calc(var(--z-header) + 1);
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-red);
+  color: #fff;
+}
+
+.skip:focus { top: 8px; }
+
+.loading {
+  padding: var(--space-3xl);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.footer {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  gap: var(--space-lg);
+  padding: var(--space-md) var(--section-px);
+  border-top: 1px solid rgba(255, 31, 61, 0.15);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+.footer a { color: var(--text-muted); text-decoration: underline; text-underline-offset: 3px; }
+.footer a:hover { color: var(--color-white); }

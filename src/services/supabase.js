@@ -5,7 +5,7 @@
  * Les clés sont lues depuis les variables d'environnement Vite (.env).
  *
  * ⚠️  Ne jamais écrire les clés directement ici.
- *     Remplir le fichier .env à la racine du projet :
+ *     Seule la clé PUBLIQUE (anon) est autorisée côté navigateur.
  *     VITE_SUPABASE_URL=https://xxxx.supabase.co
  *     VITE_SUPABASE_ANON_KEY=eyJ...
  */
@@ -22,7 +22,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-export const supabase = createClient(
-  supabaseUrl ?? '',
-  supabaseAnonKey ?? ''
-);
+// null si non configuré : les services gèrent ce cas (le site reste utilisable, sans vote)
+export const supabase = supabaseUrl && supabaseAnonKey
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;

@@ -1,6 +1,8 @@
 -- ═══════════════════════════════════════════════════════════════
--- Love&Faith — Script SQL Supabase
--- À exécuter dans : https://app.supabase.com → SQL Editor
+-- Love&Faith — Script SQL Supabase (V1, conservé pour l'historique)
+-- ⚠️ Ne plus exécuter tel quel : la politique « preorders_select_public »
+--    exposait les données personnelles et est supprimée par
+--    supabase/migrations/20261029120000_community_vote.sql (voir docs/SUPABASE.md).
 -- ═══════════════════════════════════════════════════════════════
 
 -- ─────────────────────────────────────────

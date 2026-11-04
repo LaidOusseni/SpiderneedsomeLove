@@ -6,16 +6,32 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "assets": "node scripts/prepare-assets.mjs",
+    "check:e2e": "node scripts/e2e-check.mjs",
+    "figurine": "node scripts/figurine/run.cjs --preview",
+    "figurine:rig": "node scripts/figurine/compress-rig.mjs",
+    "check:poses": "node scripts/e2e-poses.mjs",
+    "check:vote": "node scripts/e2e-vote.mjs",
+    "mockups:cutout": "node scripts/cutout-mockups.mjs"
   },
   "dependencies": {
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.17.14",
     "@supabase/supabase-js": "^2.111.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^7.18.2"
+    "react-router-dom": "^7.18.2",
+    "three": "^0.169.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.3.16",
     "@vitejs/plugin-react": "^4.3.1",
-    "vite": "^5.4.21"
+    "meshoptimizer": "^1.1.1",
+    "puppeteer-core": "^23.11.1",
+    "sharp": "^0.33.5",
+    "vite": "^5.4.21",
+    "vitest": "^2.1.9"
   }
 }

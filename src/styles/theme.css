@@ -1,22 +1,30 @@
 :root {
-  /* ===== PALETTE ===== */
-  --color-red: #8E0E12;
-  --color-blue: #82A7F8;
-  --color-yellow: #FFD633;
-  --color-black: #111111;
-  --color-white: #FFFFFF;
+  /* ===== PALETTE LOVE&FAITH ===== */
+  --color-black: #050505;
+  --color-red-deep: #450000;
+  --color-bordeaux: #760000;
+  --color-red: #c90025;
+  --color-red-glow: #ff1f3d;
+  --color-white: #ffffff;
+  --color-offwhite: #f4ede9;
+  --color-gold: #c9a45c;   /* discret : réservé à la création officiellement retenue */
 
   /* Semantic */
-  --bg-primary: var(--color-red);
-  --bg-form: var(--color-blue);
-  --bg-popup: var(--color-yellow);
-  --text-primary: var(--color-white);
-  --text-dark: var(--color-black);
+  --bg-primary: var(--color-black);
+  --bg-panel: rgba(18, 4, 6, 0.78);
+  --bg-panel-solid: #120406;
+  --bg-elevated: #1a0608;
+  --text-primary: var(--color-offwhite);
+  --text-muted: rgba(244, 237, 233, 0.66);
+  --text-faint: rgba(244, 237, 233, 0.42);
+  --border-soft: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.85);
+  --focus-ring: 0 0 0 3px rgba(255, 31, 61, 0.55);
 
-  /* ===== SHADOWS ===== */
-  --shadow-comic-sm: 2px 2px 0 var(--color-black);
-  --shadow-comic-md: 4px 4px 0 var(--color-black);
-  --shadow-comic-lg: 6px 6px 0 var(--color-black);
+  /* ===== EFFETS ===== */
+  --glow-red: 0 0 24px rgba(201, 0, 37, 0.45);
+  --glow-red-strong: 0 0 40px rgba(255, 31, 61, 0.55);
+  --shadow-deep: 0 24px 60px rgba(0, 0, 0, 0.65);
 
   /* ===== SPACING ===== */
   --space-xs: 4px;
@@ -42,20 +50,21 @@
   --z-header: 100;
   --z-modal-bg: 900;
   --z-modal: 1000;
-  --z-popup: 1100;
+  --z-intro: 2000;
 
   /* ===== TRANSITIONS ===== */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --transition-fast: 150ms ease;
   --transition-base: 300ms ease;
-  --transition-slow: 600ms ease;
-  --transition-page: 800ms ease;
+  --transition-slow: 600ms var(--ease-out);
 
   /* ===== TYPOGRAPHY ===== */
-  --font-title: 'Bangers', cursive;
-  --font-body: 'Poppins', sans-serif;
+  --font-title: 'Playfair Display', Georgia, serif;
+  --font-body: 'Poppins', system-ui, sans-serif;
 
   /* ===== LAYOUT ===== */
-  --max-width: 1400px;
-  --section-px: clamp(16px, 4vw, 64px);
-  --section-py: clamp(32px, 5vw, 80px);
+  --max-width: 1280px;
+  --nav-h: 64px;
+  --section-px: clamp(16px, 4vw, 56px);
+  --section-py: clamp(32px, 5vw, 72px);
 }

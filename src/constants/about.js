@@ -27,3 +27,6 @@ export const ABOUT_SECTIONS = [
 
 // Titre principal de la page About
 export const ABOUT_PAGE_TITLE = "À propos de l'amour";
+
+// Valeurs mises en avant en tête de page
+export const ABOUT_VALUES = ['Amour', 'Foi', 'Bienveillance', 'Solidarité', 'Partage'];

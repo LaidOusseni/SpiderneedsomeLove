@@ -1,0 +1,164 @@
+/* Sélecteur de poses — colonne « écran de sélection » à droite du visualiseur, barre compacte sur mobile */
+.bar {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 6px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(20, 2, 4, 0.72), rgba(5, 0, 1, 0.72));
+  backdrop-filter: blur(6px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.title {
+  font-size: 0.58rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--color-red-glow);
+  padding-bottom: 2px;
+}
+
+.item {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 58px;
+  padding: 0;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.55);
+  color: rgba(244, 237, 233, 0.62);
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.25s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.item:hover:not(:disabled) {
+  color: var(--color-offwhite);
+  border-color: rgba(255, 31, 61, 0.6);
+  box-shadow: 0 0 16px rgba(255, 31, 61, 0.22);
+  transform: translateX(-2px);
+}
+
+.item:focus-visible {
+  outline: 2px solid var(--color-red-glow);
+  outline-offset: 2px;
+}
+
+.item:disabled { opacity: 0.4; cursor: default; }
+
+.active {
+  color: var(--color-white);
+  border-color: var(--color-red-glow);
+  background: radial-gradient(circle at 50% 60%, rgba(201, 0, 37, 0.45), rgba(40, 0, 6, 0.85) 70%);
+  box-shadow: 0 0 0 1px rgba(255, 31, 61, 0.35), 0 0 22px rgba(255, 31, 61, 0.45);
+}
+
+.active::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 50%;
+  width: 3px;
+  height: 60%;
+  transform: translateY(-50%);
+  border-radius: 2px;
+  background: var(--color-red-glow);
+  box-shadow: 0 0 10px var(--color-red-glow);
+}
+
+.index {
+  position: absolute;
+  top: 3px;
+  left: 5px;
+  font-size: 0.52rem;
+  letter-spacing: 0.05em;
+  color: rgba(255, 31, 61, 0.75);
+}
+
+.icon {
+  width: 30px;
+  height: 39px;
+  fill: currentColor;
+}
+
+.limb {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 4.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hand { fill: none; stroke: currentColor; stroke-width: 1.8; }
+.seat { fill: rgba(255, 31, 61, 0.55); }
+
+/* Visualiseur peu haut (fiche création) : colonne compacte */
+@container (max-height: 540px) {
+  .bar { gap: 4px; padding: 6px 5px; }
+  .title { display: none; }
+  .item { width: 46px; height: 44px; }
+  .icon { width: 24px; height: 31px; }
+  .index { display: none; }
+}
+
+/* Infobulle (ordinateur) */
+.label {
+  position: absolute;
+  right: calc(100% + 12px);
+  top: 50%;
+  transform: translate(6px, -50%);
+  white-space: nowrap;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 31, 61, 0.45);
+  background: rgba(10, 1, 2, 0.92);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--color-offwhite);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.item:hover .label,
+.item:focus-visible .label {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+
+/* Mobile : barre horizontale compacte en bas, défilable */
+@media (max-width: 700px) {
+  .bar {
+    top: auto;
+    bottom: 10px;
+    right: 50%;
+    transform: translateX(50%);
+    flex-direction: row;
+    max-width: calc(100% - 20px);
+    overflow-x: auto;
+    padding: 5px;
+    gap: 4px;
+    scrollbar-width: none;
+  }
+
+  .bar::-webkit-scrollbar { display: none; }
+  .title { display: none; }
+  .item { width: 40px; height: 46px; flex: 0 0 auto; }
+  .item:hover:not(:disabled) { transform: none; }
+  .icon { width: 23px; height: 30px; }
+  .index { display: none; }
+  .label { display: none; }
+  .active::before { left: 50%; top: auto; bottom: -5px; width: 50%; height: 3px; transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item, .label { transition: none; }
+}

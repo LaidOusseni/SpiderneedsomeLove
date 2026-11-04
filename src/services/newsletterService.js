@@ -30,6 +30,8 @@ export async function subscribe(email) {
     return { success: false, message: 'Adresse e-mail invalide.' };
   }
 
+  if (!supabase) throw new Error('Supabase non configuré');
+
   const { error } = await supabase
     .from('newsletter')
     .insert([{ email: email.trim().toLowerCase() }]);

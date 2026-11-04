@@ -1,30 +1,64 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './Modal.module.css';
 
 /**
- * Generic modal wrapper — renders children in a fixed overlay
- * @param {boolean} isOpen
- * @param {function} onClose - called when clicking the backdrop
+ * Fenêtre modale accessible : Échap pour fermer, focus conservé dans la fenêtre,
+ * retour du focus à l'élément d'origine à la fermeture, défilement de la page bloqué.
  */
-const Modal = ({ isOpen, onClose, children }) => {
-  // Prevent body scroll when open
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([tabindex="-1"]), select, textarea, [tabindex]:not([tabindex="-1"])';
+
+const Modal = ({ isOpen, onClose, labelledBy, children }) => {
+  const panelRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
+    if (!isOpen) return undefined;
+    const previous = document.activeElement;
+    document.body.style.overflow = 'hidden';
+    const first = panelRef.current?.querySelector(FOCUSABLE);
+    (first ?? panelRef.current)?.focus();
+
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onCloseRef.current?.();
+      } else if (e.key === 'Tab' && panelRef.current) {
+        const items = [...panelRef.current.querySelectorAll(FOCUSABLE)];
+        if (!items.length) return;
+        const [a, b] = [items[0], items[items.length - 1]];
+        if (e.shiftKey && document.activeElement === a) { e.preventDefault(); b.focus(); }
+        else if (!e.shiftKey && document.activeElement === b) { e.preventDefault(); a.focus(); }
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
+      previous?.focus?.();
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  return (
-    <div className={styles.overlay} onClick={onClose} role="dialog" aria-modal="true">
-      <div className={styles.content} onClick={(e) => e.stopPropagation()}>
+  return createPortal(
+    <div className={styles.overlay} onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}>
+      <div
+        ref={panelRef}
+        className={styles.panel}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={labelledBy}
+        tabIndex={-1}
+      >
+        <button type="button" className={styles.close} onClick={onClose} aria-label="Fermer">
+          ×
+        </button>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 

@@ -1,0 +1,36 @@
+.toggle {
+  display: inline-flex;
+  padding: 4px;
+  gap: 4px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  background: rgba(8, 1, 2, 0.75);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-title);
+  font-style: italic;
+  font-weight: 900;
+  font-size: 0.98rem;
+  color: rgba(255, 255, 255, 0.6);
+  transition: background var(--transition-base), color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.btn:hover:not(:disabled) { color: var(--color-white); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.active {
+  color: var(--color-white);
+  background: linear-gradient(180deg, #d4002a, #7a000e);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55), 0 0 18px rgba(255, 31, 61, 0.55);
+}
+
+.icon { font-style: normal; font-size: 0.85em; }
