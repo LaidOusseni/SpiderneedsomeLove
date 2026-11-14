@@ -23,6 +23,8 @@
 
 .candidate { color: #ff5a6e; border-color: rgba(255, 31, 61, 0.45); }
 .candidate .dot { box-shadow: 0 0 8px #ff1f3d; animation: pulse 2s ease-in-out infinite; }
+.current_drop { color: #fff; border-color: rgba(255, 31, 61, 0.85); background: rgba(145, 0, 24, 0.62); }
+.current_drop .dot { box-shadow: 0 0 8px #ff1f3d; }
 .winner { color: var(--color-gold); border-color: rgba(201, 164, 92, 0.6); background: rgba(40, 28, 6, 0.6); }
 .closed, .not_selected { color: var(--text-muted); }
 .historic { color: #e8cfd2; border-color: rgba(255, 255, 255, 0.25); }

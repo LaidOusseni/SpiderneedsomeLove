@@ -22,6 +22,19 @@ import { CREATION_STORIES } from './creationStories';
 
 const RAW_CREATIONS = [
   {
+    slug: 'batman-drop-01',
+    name: 'Batman',
+    subtitle: 'Drop #01',
+    status: 'current_drop',
+    isCurrentDrop: true,
+    isPreorderAvailable: true,
+    preorderTag: 'DROP #01 — PRÉCOMMANDES OUVERTES',
+    assetSlug: 'love-in-darkness',
+    storySlug: 'love-in-darkness',
+    tagline: 'Le premier chapitre Love&Faith.',
+    garment: { cut: 'longsleeve' },
+  },
+  {
     slug: 'heart-of-ice',
     name: 'Heart of Ice',
     status: 'candidate',
@@ -101,14 +114,20 @@ function buildGarment(slug, garment) {
 export const CREATIONS = RAW_CREATIONS.map((c, index) => ({
   ...c,
   index,
-  icon: asset(c.slug, 'icon.webp'),
-  mockups: { front: asset(c.slug, 'front.webp'), back: asset(c.slug, 'back.webp') },
-  garment: buildGarment(c.slug, c.garment ?? {}),
-  story: CREATION_STORIES[c.slug]?.story ?? [],
-  message: CREATION_STORIES[c.slug]?.message ?? null,
-  storyTodo: CREATION_STORIES[c.slug]?.todo ?? null,
+  icon: asset(c.assetSlug ?? c.slug, 'icon.webp'),
+  mockups: {
+    front: asset(c.assetSlug ?? c.slug, 'front.webp'),
+    back: asset(c.assetSlug ?? c.slug, 'back.webp'),
+  },
+  garment: buildGarment(c.assetSlug ?? c.slug, c.garment ?? {}),
+  story: CREATION_STORIES[c.storySlug ?? c.slug]?.story ?? [],
+  message: CREATION_STORIES[c.storySlug ?? c.slug]?.message ?? null,
+  storyTodo: CREATION_STORIES[c.storySlug ?? c.slug]?.todo ?? null,
 }));
 
-export const CANDIDATES = CREATIONS.filter((c) => c.status !== 'historic');
+export const CURRENT_DROP_SLUG = 'batman-drop-01';
+export const CURRENT_DROP = CREATIONS.find((c) => c.slug === CURRENT_DROP_SLUG) ?? null;
+export const CANDIDATES = CREATIONS.filter((c) => c.status === 'candidate');
+export const HISTORIC_CREATIONS = CREATIONS.filter((c) => c.status === 'historic');
 
 export const getCreation = (slug) => CREATIONS.find((c) => c.slug === slug) ?? null;

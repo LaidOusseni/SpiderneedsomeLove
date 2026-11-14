@@ -29,6 +29,13 @@ npm run dev               # http://localhost:3000
 Voir **[docs/SUPABASE.md](docs/SUPABASE.md)** : migration à exécuter, ouverture / clôture du vote,
 désignation du gagnant, vérifications de sécurité.
 
+### Drop actuel et prochaines créations
+
+- Le premier drop Love&Faith est le Batman (`batman-drop-01`) : il est mis en avant comme produit disponible à la précommande.
+- `Love in Darkness` et les autres candidates restent en compétition pour le prochain drop.
+- Masks & Hearts est historique et le Batman est exclu du classement communautaire.
+- Les formulaires de précommande sont gérés côté frontend avec sauvegarde locale en secours si la table Supabase `preorders` n'est pas encore créée.
+
 ## Déploiement Vercel
 
 1. Vercel → Project → Settings → Environment Variables : `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`

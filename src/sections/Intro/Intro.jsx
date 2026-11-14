@@ -2,38 +2,46 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import styles from './Intro.module.css';
 import { BRAND_ASSETS, INTRO_LINES } from '../../constants/site';
 import { hasWebGL, prefersReducedMotion } from '../../three/webgl';
+import AsciiLogoBackground from '../../components/AsciiLogoBackground/AsciiLogoBackground';
 
 const LogoCanvas = lazy(() => import('./LogoCanvas'));
 
 /**
  * Introduction immersive.
- * Phases : phrase → logo → bouton. AUCUNE navigation automatique :
+ * Phases : titre 2D → phrase → fondu → logo 3D → bouton. AUCUNE navigation automatique :
  * seul le bouton « Cliquez ici » permet d'entrer (le fond et le logo ne sont pas cliquables).
  */
-const T_LOGO = 2600; // la phrase a le temps d'être lue
-const T_CTA = 1500;  // après l'apparition du logo
-const T_LEAVE = 950; // durée de la transition de sortie
+const T_TITLE = 3200;
+const T_PHRASE = 3100;
+const T_LOGO_3D = 1600;
+const T_LEAVE = 950;
 
 const Intro = ({ onEnter }) => {
   const [reducedMotion] = useState(prefersReducedMotion);
-  const [phase, setPhase] = useState(reducedMotion ? 'cta' : 'phrase');
+  const [phase, setPhase] = useState('title');
   const [logoFailed, setLogoFailed] = useState(() => !hasWebGL());
-  const [logoReady, setLogoReady] = useState(false);
   const leaving = useRef(false);
   const buttonRef = useRef(null);
 
   useEffect(() => {
-    if (reducedMotion) return undefined;
-    const t = setTimeout(() => setPhase('logo'), T_LOGO);
-    return () => clearTimeout(t);
-  }, [reducedMotion]);
-
-  // Le bouton apparaît après le logo (ou après un délai si le logo tarde / échoue)
-  useEffect(() => {
-    if (phase !== 'logo') return undefined;
-    const t = setTimeout(() => setPhase('cta'), logoReady || logoFailed ? T_CTA : T_CTA + 1200);
-    return () => clearTimeout(t);
-  }, [phase, logoReady, logoFailed]);
+    if (!['title', 'phrase', 'phraseExit', 'logo3d'].includes(phase)) return undefined;
+    const duration = phase === 'title'
+      ? (reducedMotion ? 500 : T_TITLE)
+      : phase === 'phrase'
+        ? (reducedMotion ? 1000 : T_PHRASE)
+        : phase === 'phraseExit'
+          ? (reducedMotion ? 150 : 850)
+        : (reducedMotion ? 500 : T_LOGO_3D);
+    const nextPhase = phase === 'title'
+      ? 'phrase'
+      : phase === 'phrase'
+        ? 'phraseExit'
+        : phase === 'phraseExit'
+          ? 'logo3d'
+          : 'cta';
+    const timer = setTimeout(() => setPhase(nextPhase), duration);
+    return () => clearTimeout(timer);
+  }, [phase, reducedMotion]);
 
   useEffect(() => {
     if (phase === 'cta') buttonRef.current?.focus({ preventScroll: true });
@@ -46,12 +54,14 @@ const Intro = ({ onEnter }) => {
     setTimeout(onEnter, reducedMotion ? 150 : T_LEAVE);
   }, [onEnter, reducedMotion]);
 
-  const showLogo = phase !== 'phrase';
+  const showPhrase = phase === 'phrase';
+  const showTitle = phase === 'title';
+  const showLogo3d = phase === 'logo3d' || phase === 'cta';
 
   return (
     <section className={`${styles.intro} ${phase === 'leaving' ? styles.leaving : ''}`} aria-label="Introduction Love&Faith">
       <video
-        className={styles.video}
+        className={`${styles.video} ${showTitle ? styles.videoHidden : ''}`}
         autoPlay={!reducedMotion}
         muted
         loop
@@ -62,10 +72,18 @@ const Intro = ({ onEnter }) => {
       >
         <source src={BRAND_ASSETS.introVideo} type="video/mp4" />
       </video>
+      <AsciiLogoBackground />
       <div className={styles.vignette} aria-hidden="true" />
 
       <div className={styles.content}>
-        <h1 className={`${styles.phrase} ${showLogo ? styles.phraseUp : ''}`}>
+        <img
+          src={BRAND_ASSETS.titleIntro}
+          alt=""
+          className={`${styles.titleLogo} ${showTitle ? styles.titleLogoVisible : styles.titleLogoHidden}`}
+          aria-hidden="true"
+        />
+
+        <h1 className={`${styles.phrase} ${showPhrase ? styles.phraseUp : styles.phraseHidden} ${showPhrase ? styles.phraseVisible : ''}`}>
           {INTRO_LINES.map((line, i) => (
             <span key={line} className={styles.line} style={{ animationDelay: `${0.35 + i * 0.85}s` }}>
               {line}
@@ -73,18 +91,19 @@ const Intro = ({ onEnter }) => {
           ))}
         </h1>
 
-        <div className={`${styles.logo} ${showLogo ? styles.logoVisible : ''}`} aria-hidden="true">
+        <div
+          className={`${styles.logo} ${showLogo3d ? styles.logoVisible : ''}`}
+        >
           <div className={styles.logoHalo} />
-          {showLogo && !logoFailed && (
+          {showLogo3d && !logoFailed && (
             <Suspense fallback={null}>
               <LogoCanvas
                 reducedMotion={reducedMotion}
-                onReady={() => setLogoReady(true)}
                 onError={() => setLogoFailed(true)}
               />
             </Suspense>
           )}
-          {logoFailed && <img src={BRAND_ASSETS.logo2d} alt="" className={styles.logo2d} />}
+          {showLogo3d && logoFailed && <img src={BRAND_ASSETS.logo2d} alt="" className={styles.logo2d} />}
         </div>
 
         <div className={styles.ctaWrap}>
@@ -97,7 +116,7 @@ const Intro = ({ onEnter }) => {
             aria-hidden={phase !== 'cta' && phase !== 'leaving'}
             tabIndex={phase === 'cta' ? 0 : -1}
           >
-            <span className={styles.ctaLabel}>Cliquez ici</span>
+            <span className={styles.ctaLabel}>Cliquer ici</span>
             <span className={styles.ctaHint}>Entrer dans l'univers Love&amp;Faith</span>
           </button>
         </div>

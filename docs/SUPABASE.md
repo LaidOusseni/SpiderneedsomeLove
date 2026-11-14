@@ -13,8 +13,10 @@ Dashboard Supabase → projet `tpvmpbofkwmsjqnkuirq` → **SQL Editor** → *New
 1. `supabase/migrations/20261029120000_community_vote.sql` — créations, drop, votes, fonctions de vote
 2. `supabase/migrations/20261031120000_newsletter.sql` — table newsletter (inscription seule)
 3. `supabase/seed_creations.sql` — les 7 créations + le drop (en « préparation »)
+4. `supabase/migrations/20261105120000_preorders.sql` — collecte des précommandes Batman
+5. `supabase/migrations/20261105130000_open_candidate_vote.sql` — Batman en drop actuel et vote ouvert pour toutes les candidates
 
-Les trois scripts peuvent être relancés sans risque (aucune donnée écrasée, aucun doublon, rien de supprimé).
+Les migrations peuvent être relancées. La dernière archive le gagnant annoncé (s'il y en a un), ouvre le vote sans date de fermeture et conserve toutes les lignes de votes existantes.
 
 ## 2. Mettre la configuration en ligne (Vercel)
 
@@ -48,21 +50,16 @@ instagram_normalized)` en base). Une personne peut soutenir plusieurs créations
 personne pour tout le drop », il faudrait remplacer cette contrainte par `UNIQUE (instagram_normalized)` — décision à
 prendre avant l'ouverture du vote (le site et les textes seraient à ajuster en conséquence).
 
-## 4. Ouvrir, clôturer, annoncer
+## 4. Fermer manuellement, annoncer
 
-Dans le SQL Editor :
+Le vote reste ouvert tant que vous ne le fermez pas. La migration met `closes_at` à `NULL` et interdit les dates de fermeture automatique en base.
+Dans le SQL Editor du dashboard Supabase, exécuter manuellement :
 
 ```sql
--- Ouvrir le vote
-update public.drop_settings set vote_status = 'open', opens_at = now() where id = 1;
-
--- (optionnel) Clôture automatique à une date choisie
-update public.drop_settings set closes_at = '2026-12-01 20:00+01' where id = 1;
-
--- Clôturer (les jauges restent visibles avec les résultats définitifs ; les boutons de vote disparaissent)
+-- Fermer les votes. Les jauges restent visibles et les votes existants sont conservés.
 update public.drop_settings set vote_status = 'closed' where id = 1;
 
--- Désigner officiellement la création retenue (y compris pour départager une égalité)
+-- Après clôture, désigner officiellement la création retenue.
 update public.drop_settings
   set vote_status = 'announced',
       winner_creation_id = (select id from public.creations where slug = 'world-love'),
@@ -84,6 +81,8 @@ Ce que montre « Le chemin de l'amour » selon le statut :
 | `announced` | création officiellement retenue (celle de `winner_creation_id`, jamais déduite du classement) |
 
 Actualisation : à l'arrivée sur la page, après chaque vote, puis toutes les 45 s quand l'onglet est visible.
+
+Batman (`batman-drop-01`) est le drop actuel et Masks & Hearts reste historique. Les deux sont exclus du vote et du classement. Les compteurs de chaque candidate sont calculés séparément par `creation_id`; la migration ne supprime ni ne déplace aucun vote.
 
 ## 5. Consulter les votes (vous seul·e)
 

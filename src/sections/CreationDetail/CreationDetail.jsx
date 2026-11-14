@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import styles from './CreationDetail.module.css';
-import { CANDIDATES, CREATIONS, getCreation } from '../../constants/creations';
+import { CANDIDATES, CREATIONS, CURRENT_DROP, getCreation } from '../../constants/creations';
 import { useVoteResults } from '../../context/VoteResultsContext';
 import { canVote, resolveCreationStatus } from '../../utils/creationStatus';
 import { computeStandings } from '../../utils/voteStats';
@@ -10,12 +10,38 @@ import StatusBadge from '../../components/StatusBadge/StatusBadge';
 import ProgressGauge from '../../components/ProgressGauge/ProgressGauge';
 import Modal from '../../components/Modal/Modal';
 import VoteForm from '../../components/VoteForm/VoteForm';
+import PreorderForm from '../../components/PreorderForm/PreorderForm';
 import MockupView from '../../components/MockupView/MockupView';
 import ViewModeToggle from '../../components/ViewModeToggle/ViewModeToggle';
 import { hasWebGL } from '../../three/webgl';
 import { useViewMode } from '../../utils/viewMode';
+import { fetchPreorderCount } from '../../services/preorderService';
 
 const GarmentViewer = lazy(() => import('../../components/GarmentViewer/GarmentViewer'));
+
+function PreorderPanel({ creation, count, onOpen }) {
+  return (
+    <div className={`${styles.votePanel} ${styles.preorderPanel}`}>
+      <p className={styles.kicker}>DROP #01 — PRÉCOMMANDES OUVERTES</p>
+      <h2 className={styles.voteTitle}>Le premier drop Love&Faith est là</h2>
+      <p className={styles.voteText}>
+        Ce modèle est le premier produit officiel Love&Faith et le seul actuellement disponible à la précommande.
+      </p>
+      <div className={styles.preorderSummary}>
+        <strong>{count}</strong>
+        <span>précommande{count > 1 ? 's' : ''} enregistrée{count > 1 ? 's' : ''}</span>
+      </div>
+      <button type="button" className={styles.voteBtn} onClick={onOpen}>
+        <span className={styles.voteBtnLabel}>Précommander maintenant</span>
+        <span className={styles.voteBtnHint}>Aucun paiement immédiat</span>
+      </button>
+      <p className={styles.small}>
+        Cette création n'est pas un vote : c'est un produit disponible dès maintenant.
+        Les autres créations restent en compétition pour le prochain drop Love&Faith.
+      </p>
+    </div>
+  );
+}
 
 function VotePanel({ creation, status, results, onVote }) {
   const standing = useMemo(() => {
@@ -119,12 +145,25 @@ const CreationDetail = () => {
   const results = useVoteResults();
   const viewerRef = useRef(null);
   const [voteFor, setVoteFor] = useState(null); // création figée à l'ouverture du formulaire
+  const [preorderFor, setPreorderFor] = useState(null);
+  const [preorderCount, setPreorderCount] = useState(0);
   const [params, setParams] = useSearchParams();
   const [can3D] = useState(hasWebGL);
   const [viewMode, setViewMode] = useViewMode();
 
   const openVote = useCallback(() => creation && setVoteFor(creation), [creation]);
   const closeVote = useCallback(() => setVoteFor(null), []);
+  const openPreorder = useCallback(() => creation && setPreorderFor(creation), [creation]);
+  const closePreorder = useCallback(() => setPreorderFor(null), []);
+
+  useEffect(() => {
+    if (!creation || !creation.isCurrentDrop) return;
+    let active = true;
+    fetchPreorderCount().then((res) => {
+      if (active) setPreorderCount(res.count || 0);
+    }).catch(() => undefined);
+    return () => { active = false; };
+  }, [creation]);
 
   // Lien « Je vote pour cette création » (sélection) : /propager/<slug>?voter=1 ouvre le formulaire de CETTE création,
   // dès que les résultats confirment que le vote est ouvert. Le paramètre est retiré ensuite (pas de réouverture).
@@ -173,7 +212,11 @@ const CreationDetail = () => {
 
         <div className={styles.intro}>
           <p className={styles.kicker}>
-            {status === 'historic' ? 'Création historique — déjà sortie' : 'Candidate au prochain drop'}
+            {status === 'current_drop'
+              ? 'DROP ACTUEL — PRÉCOMMANDES OUVERTES'
+              : status === 'historic'
+                ? 'ANCIEN DROP — DÉJÀ SORTI'
+                : 'Candidate au prochain drop'}
           </p>
           <h1 className={styles.name}>{creation.name}</h1>
           {creation.subtitle && <p className={styles.subtitle}>{creation.subtitle}</p>}
@@ -192,7 +235,11 @@ const CreationDetail = () => {
           )}
         </section>
 
-        <VotePanel creation={creation} status={status} results={results} onVote={openVote} />
+        {creation.isCurrentDrop ? (
+          <PreorderPanel creation={creation} count={preorderCount} onOpen={openPreorder} />
+        ) : (
+          <VotePanel creation={creation} status={status} results={results} onVote={openVote} />
+        )}
       </div>
 
       <Gallery creation={creation} />
@@ -215,6 +262,19 @@ const CreationDetail = () => {
             creation={voteFor}
             onVoted={results.applyVoteResult}
             onClose={closeVote}
+          />
+        )}
+      </Modal>
+
+      <Modal isOpen={Boolean(preorderFor)} onClose={closePreorder}>
+        {preorderFor && (
+          <PreorderForm
+            key={preorderFor.slug}
+            creation={preorderFor}
+            onSubmitted={(count) => {
+              setPreorderCount(count || preorderCount);
+            }}
+            onClose={closePreorder}
           />
         )}
       </Modal>

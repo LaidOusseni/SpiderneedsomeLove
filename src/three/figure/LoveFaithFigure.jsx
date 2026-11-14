@@ -116,15 +116,25 @@ function usePosePlayer({ scene, seat, clips }, pose, reducedMotion, onPoseApplie
     const w0 = next.getEffectiveWeight();
     if (w0 < 0.0001) next.reset();
     next.enabled = true;
+    if (reducedMotion) {
+      for (const f of from) f.action.stop();
+      next.reset().setEffectiveWeight(1).play();
+      next.time = next.getClip().duration;
+      next.paused = true;
+      mixer.update(0);
+      state.current = { target: pose, from: [], next, w0: 1, t: 1 };
+      onPoseApplied?.(pose);
+      return;
+    }
     next.setEffectiveWeight(w0).play();
-    state.current = { target: pose, from, next, w0, t: reducedMotion ? 1 : 0 };
-  }, [pose, actions, reducedMotion]);
+    state.current = { target: pose, from, next, w0, t: 0 };
+  }, [pose, actions, reducedMotion, mixer, onPoseApplied]);
 
   useFrame((_, dt) => {
     const s = state.current;
     if (!s) return;
     if (s.next && s.t < 1) {
-      s.t = Math.min(1, s.t + Math.min(dt, 0.1) / TRANSITION); // temps réel (un appareil lent ne ralentit pas la transition)
+      s.t = Math.min(1, s.t + dt / TRANSITION);
       const e = smooth(s.t);
       for (const f of s.from) f.action.setEffectiveWeight(f.w0 * (1 - e));
       s.next.setEffectiveWeight(s.w0 + (1 - s.w0) * e);

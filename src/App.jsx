@@ -7,6 +7,7 @@ import About from './sections/About/About';
 import Journey from './sections/Journey/Journey';
 import Privacy from './sections/Privacy/Privacy';
 import { VoteResultsProvider } from './context/VoteResultsContext';
+import AsciiLogoBackground from './components/AsciiLogoBackground/AsciiLogoBackground';
 import { LEGACY_REDIRECTS } from './constants/navigation';
 import styles from './App.module.css';
 
@@ -47,6 +48,7 @@ function Site() {
 
   return (
     <div className={styles.site}>
+      <AsciiLogoBackground />
       <ScrollToTop />
       <a href="#contenu" className={styles.skip}>Aller au contenu</a>
       <NavBar />

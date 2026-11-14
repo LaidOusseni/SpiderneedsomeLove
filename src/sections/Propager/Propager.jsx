@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import styles from './Propager.module.css';
-import { CANDIDATES, CREATIONS, getCreation } from '../../constants/creations';
+import { CANDIDATES, CREATIONS, CURRENT_DROP, getCreation } from '../../constants/creations';
 import { useVoteResults } from '../../context/VoteResultsContext';
 import { canVote, resolveCreationStatus } from '../../utils/creationStatus';
 import { useViewMode } from '../../utils/viewMode';
@@ -26,6 +26,8 @@ function prefetch(creation) {
 }
 
 function Tile({ creation, selected, onSelect, number }) {
+  const isHistoric = creation.status === 'historic';
+  const badgeLabel = creation.isCurrentDrop ? 'Drop actuel' : isHistoric ? 'Ancien drop' : 'Candidate';
   return (
     <button
       type="button"
@@ -34,14 +36,16 @@ function Tile({ creation, selected, onSelect, number }) {
       onMouseEnter={() => prefetch(creation)}
       onFocus={() => prefetch(creation)}
       aria-pressed={selected}
-      aria-label={`${creation.name}${creation.subtitle ? ` — ${creation.subtitle}` : ''}`}
+      aria-label={`${creation.name}${creation.subtitle ? ` — ${creation.subtitle}` : ''} — ${badgeLabel}`}
     >
       <span className={styles.tileImgWrap}>
         <img src={creation.icon} alt="" className={styles.tileImg} loading="lazy" decoding="async" />
       </span>
       <span className={styles.tileNum} aria-hidden="true">{number}</span>
       <span className={styles.tileName}>{creation.name}</span>
-      {creation.status === 'historic' && <span className={styles.tileTag}>{creation.subtitle ?? 'Déjà sorti'}</span>}
+      <span className={`${styles.tileStatus} ${creation.isCurrentDrop ? styles.tileStatusCurrent : ''} ${isHistoric ? styles.tileStatusHistoric : ''}`}>
+        {badgeLabel}
+      </span>
       {selected && <span className={styles.tileP1} aria-hidden="true">P1</span>}
     </button>
   );
@@ -142,6 +146,9 @@ const Propager = () => {
                 )}
               </div>
               {selected.tagline && <p className={styles.tagline}>« {selected.tagline} »</p>}
+              {selected.isCurrentDrop && (
+                <p className={styles.currentDropNotice}>Précommandes ouvertes</p>
+              )}
             </div>
 
             <div className={styles.tools}>
@@ -184,11 +191,29 @@ const Propager = () => {
       {/* ── Panneau de sélection ── */}
       <aside className={styles.panel} aria-label="Créations">
         <div className={styles.panelGroup}>
+          {CURRENT_DROP && (
+            <div className={styles.currentDropCard}>
+              <img src={CURRENT_DROP.icon} alt="" className={styles.currentDropIcon} />
+              <span className={styles.currentDropBadge}>DROP ACTUEL</span>
+              <h2 className={styles.currentDropTitle}>{CURRENT_DROP.name}</h2>
+              <p className={styles.currentDropStatus}>Précommandes ouvertes</p>
+              <Link to={`/propager/${CURRENT_DROP.slug}`} className={styles.currentDropButton}>Précommander</Link>
+            </div>
+          )}
           <h2 className={styles.panelTitle}>
-            Créations <span>{CANDIDATES.length} candidates au prochain drop</span>
+            Prochaines créations <span>{CANDIDATES.length} candidates</span>
           </h2>
           <div className={styles.tiles}>
-            {CREATIONS.map((c) => (
+            {CANDIDATES.map((c) => (
+              <Tile key={c.slug} creation={c} number={String(c.index + 1).padStart(2, '0')}
+                selected={selected?.slug === c.slug} onSelect={select} />
+            ))}
+          </div>
+          <h2 className={styles.panelTitle}>
+            Anciens drops <span>{CREATIONS.filter((c) => c.status === 'historic').length}</span>
+          </h2>
+          <div className={styles.tiles}>
+            {CREATIONS.filter((c) => c.status === 'historic').map((c) => (
               <Tile key={c.slug} creation={c} number={String(c.index + 1).padStart(2, '0')}
                 selected={selected?.slug === c.slug} onSelect={select} />
             ))}

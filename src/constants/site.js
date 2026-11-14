@@ -1,9 +1,9 @@
-// Phrase d'introduction — formulation exacte de la V1
-export const INTRO_LINES = ['Un grand amour', 'vient avec de grandes responsabilités'];
+export const INTRO_LINES = ['Un grand amour vient avec de grandes responsabilités.'];
 
 export const BRAND_ASSETS = {
   logo3d: '/brand/logo-3d.glb',
   logo2d: '/brand/logo-2d.png',
+  titleIntro: '/brand/title-intro.png',
   introVideo: '/brand/intro-bg.mp4',
   introPoster: '/brand/intro-poster.jpg',
   beanieKiss: '/brand/beanie-kiss.png', // bisou rose du bonnet de la figurine (généré par npm run assets)

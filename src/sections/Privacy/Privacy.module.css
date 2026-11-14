@@ -12,6 +12,7 @@
 
 .head {
   position: relative;
+  overflow: clip;
   padding: var(--space-xl) 0 var(--space-md);
   border-bottom: 1px solid rgba(255, 31, 61, 0.25);
 }

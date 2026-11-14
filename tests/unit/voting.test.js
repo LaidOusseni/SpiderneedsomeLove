@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { normalizeInstagram, validateInstagram, cleanName } from '../../src/utils/instagram';
 import { computeStandings, formatShare } from '../../src/utils/voteStats';
 import { resolveCreationStatus, canVote } from '../../src/utils/creationStatus';
+import { CANDIDATES, CURRENT_DROP } from '../../src/constants/creations';
 
 describe('normalizeInstagram', () => {
   it('traite @Exemple, exemple et EXEMPLE de la même façon', () => {
@@ -48,6 +49,21 @@ describe('computeStandings', () => {
   });
 });
 
+describe('drop actuel', () => {
+  it('Batman est séparé des six candidates et des anciens drops', () => {
+    expect(CURRENT_DROP?.slug).toBe('batman-drop-01');
+    expect(CANDIDATES.map((c) => c.slug)).toEqual([
+      'heart-of-ice',
+      'love-in-darkness',
+      'world-love',
+      'fabulous-love-and-faith',
+      'lva',
+      'plva',
+    ]);
+    expect(CANDIDATES.some((c) => c.status === 'historic')).toBe(false);
+  });
+});
+
 describe('statuts', () => {
   const c = { slug: 'x', status: 'candidate' };
   const ready = (drop, remote = { isCandidate: true, status: 'candidate' }) => ({
@@ -72,6 +88,20 @@ describe('statuts', () => {
     const r = ready({ voteStatus: 'open' }, { isCandidate: true, status: 'candidate' });
     expect(resolveCreationStatus(h, r)).toBe('historic');
     expect(canVote(h, r)).toBe(false);
+  });
+  it('drop actuel jamais votable même si le serveur le renvoie par erreur comme candidate', () => {
+    const currentDrop = { slug: 'batman-drop-01', status: 'current_drop', isCurrentDrop: true };
+    const r = ready({ voteStatus: 'open' }, { isCandidate: true, status: 'candidate' });
+    expect(resolveCreationStatus(currentDrop, r)).toBe('current_drop');
+    expect(canVote(currentDrop, r)).toBe(false);
+  });
+  it('toutes les candidates locales sont votables lorsque le backend les confirme', () => {
+    const results = {
+      status: 'ready',
+      drop: { voteStatus: 'open' },
+      bySlug: Object.fromEntries(CANDIDATES.map((c) => [c.slug, { isCandidate: true, status: 'candidate' }])),
+    };
+    expect(CANDIDATES.every((candidate) => canVote(candidate, results))).toBe(true);
   });
   it('backend indisponible : jamais votable', () => {
     expect(canVote(c, { status: 'unavailable' })).toBe(false);

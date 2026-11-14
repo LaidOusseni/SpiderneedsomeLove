@@ -18,7 +18,7 @@
   border-radius: var(--radius-xl);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: #0a0203;
+  background: rgba(10, 2, 3, 0.46);
   isolation: isolate;
 }
 
@@ -40,7 +40,7 @@
   background:
     radial-gradient(ellipse 60% 55% at 50% 55%, rgba(201, 0, 37, 0.42), transparent 70%),
     radial-gradient(ellipse 90% 70% at 50% 110%, rgba(118, 0, 0, 0.75), transparent 70%),
-    linear-gradient(180deg, #2a0004 0%, #120103 100%);
+    linear-gradient(180deg, rgba(42, 0, 4, 0.58) 0%, rgba(18, 1, 3, 0.36) 100%);
   transition: opacity 0.7s ease;
 }
 
@@ -65,7 +65,7 @@
 }
 
 /* Sélection : l'environnement devient presque entièrement noir */
-.isSelected .stage { background: #020000; }
+.isSelected .stage { background: rgba(2, 0, 0, 0.4); }
 .isSelected .halo { opacity: 0.06; }
 .isSelected .grid { opacity: 0.15; }
 .isSelected .spot,
@@ -217,6 +217,21 @@
   font-style: italic;
   color: var(--text-muted);
   animation: fadeUp 0.5s ease 0.4s both;
+}
+
+.currentDropNotice {
+  display: inline-flex;
+  align-self: flex-start;
+  margin-top: var(--space-sm);
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 49, 77, 0.65);
+  border-radius: var(--radius-pill);
+  color: #ffd9df;
+  background: rgba(145, 0, 24, 0.42);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 @keyframes fadeUp {
@@ -382,6 +397,68 @@
   margin-left: 6px;
 }
 
+.currentDropCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  margin-bottom: 10px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 49, 77, 0.8);
+  background: linear-gradient(180deg, rgba(120, 0, 17, 0.78), rgba(28, 0, 3, 0.9));
+  box-shadow: 0 0 28px rgba(255, 31, 61, 0.28);
+}
+
+.currentDropIcon {
+  width: 100%;
+  max-height: 120px;
+  aspect-ratio: 1.8;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.currentDropBadge {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-white);
+}
+
+.currentDropTitle {
+  font-family: var(--font-title);
+  font-style: italic;
+  font-weight: 900;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.currentDropStatus {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.currentDropButton {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 42px;
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(180deg, #d4002a, #7a000e);
+  color: var(--color-white);
+  font-family: var(--font-title);
+  font-style: italic;
+  font-weight: 900;
+  box-shadow: var(--glow-red);
+}
+
 .tiles {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -442,6 +519,33 @@
   font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.85);
   text-shadow: 0 1px 4px #000;
+}
+
+.tileStatus {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 3px 6px;
+  border: 1px solid rgba(255, 92, 113, 0.6);
+  border-radius: 4px;
+  background: rgba(52, 0, 8, 0.88);
+  color: #ffd4db;
+  font-size: 0.48rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tileStatusCurrent {
+  border-color: rgba(255, 255, 255, 0.8);
+  background: rgba(190, 0, 30, 0.94);
+  color: #fff;
+}
+
+.tileStatusHistoric {
+  border-color: rgba(210, 210, 210, 0.45);
+  background: rgba(15, 15, 15, 0.9);
+  color: #d3c7c9;
 }
 
 .tileName {
@@ -514,7 +618,7 @@
 
   .isSelected .panel { opacity: 0.8; filter: saturate(0.6); }
 
-  .viewer { inset: 60px 40px 225px; }
+  .viewer { inset: 60px 40px 190px; }
   .modeBar { top: 10px; left: 10px; }
   .toolLabel { display: none; }
   .tool { min-width: 40px; justify-content: center; }
@@ -545,4 +649,14 @@
   .arrowRight { right: 6px; }
 
   .empty { padding: var(--space-lg) 56px; }
+}
+
+@media (max-width: 420px) {
+  .page { padding-inline: 8px; }
+  .stage { min-height: 500px; }
+  .viewer { inset-inline: 30px; }
+  .nameplate { bottom: 82px; }
+  .choose { padding-inline: 12px; }
+  .chooseLabel { font-size: 1.1rem; }
+  .empty { padding-inline: 44px; }
 }

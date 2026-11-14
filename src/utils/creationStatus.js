@@ -4,11 +4,12 @@
  */
 export const STATUS_LABELS = {
   candidate: 'Candidate',
+  current_drop: 'Drop actuel',
   preparing: 'En préparation',
   closed: 'Votes clôturés',
   winner: 'Gagnante officielle',
   not_selected: 'Non retenue',
-  historic: 'Création historique',
+  historic: 'Ancien drop',
 };
 
 /**
@@ -16,6 +17,7 @@ export const STATUS_LABELS = {
  * @param results  — état du contexte VoteResults ({ status, drop, bySlug })
  */
 export function resolveCreationStatus(creation, results) {
+  if (creation.isCurrentDrop || creation.status === 'current_drop') return 'current_drop';
   if (creation.status === 'historic') return 'historic';
   const remote = results?.bySlug?.[creation.slug];
   const drop = results?.drop;
@@ -29,8 +31,9 @@ export function resolveCreationStatus(creation, results) {
 
 /** Le vote est-il possible pour cette création ? (le serveur revérifie de toute façon) */
 export function canVote(creation, results) {
+  if (creation.isCurrentDrop || creation.status !== 'candidate') return false;
   if (results?.status !== 'ready') return false;
   if (results.drop?.voteStatus !== 'open') return false;
   const remote = results.bySlug?.[creation.slug];
-  return Boolean(remote?.isCandidate && remote.status === 'candidate') && creation.status !== 'historic';
+  return Boolean(remote?.isCandidate && remote.status === 'candidate');
 }

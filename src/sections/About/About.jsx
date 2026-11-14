@@ -10,7 +10,7 @@ import { BRAND_ASSETS } from '../../constants/site';
 const About = () => (
   <section className={styles.about} aria-labelledby="about-title">
     <header className={styles.hero}>
-      <img src={BRAND_ASSETS.logo2d} alt="" className={styles.logo} aria-hidden="true" />
+      <img src={BRAND_ASSETS.titleIntro} alt="" className={styles.logo} aria-hidden="true" />
       <p className={styles.kicker}>L'univers Love&amp;Faith</p>
       <h1 id="about-title" className={styles.title}>{ABOUT_PAGE_TITLE}</h1>
       <ul className={styles.values} aria-label="Nos valeurs">

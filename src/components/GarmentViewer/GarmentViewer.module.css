@@ -24,7 +24,7 @@
 }
 
 /* Mobile : la barre des poses est en bas, la figurine est cadrée au-dessus */
-@media (max-width: 700px) {
+@container (max-width: 700px) {
   .withPoses .canvasWrap { bottom: 64px; }
 }
 

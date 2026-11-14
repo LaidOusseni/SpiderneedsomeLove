@@ -20,6 +20,11 @@
   animation: videoIn 2.4s ease both;
 }
 
+.videoHidden {
+  animation: none;
+  opacity: 0;
+}
+
 @keyframes videoIn {
   from { opacity: 0; transform: scale(1.06); }
   to { opacity: 0.55; transform: scale(1); }
@@ -61,6 +66,7 @@
   transition: transform 1.4s var(--ease-out), font-size 1.4s var(--ease-out), opacity 1s ease;
   z-index: 3;
   max-width: 22ch;
+  pointer-events: none;
 }
 
 .line {
@@ -68,6 +74,9 @@
   opacity: 0;
   filter: blur(12px);
   letter-spacing: 0.08em;
+}
+
+.phraseVisible .line {
   animation: lineIn 1.6s var(--ease-out) forwards;
 }
 
@@ -76,10 +85,15 @@
 }
 
 .phraseUp {
-  align-self: start;
-  margin-top: clamp(12px, 6vh, 64px);
-  font-size: clamp(1.15rem, 2.6vw, 2rem);
-  max-width: 30ch;
+  align-self: center;
+  font-size: clamp(1.8rem, 5vw, 4.1rem);
+  max-width: 24ch;
+}
+
+.phraseHidden {
+  opacity: 0;
+  filter: blur(10px);
+  transform: translateY(18px);
 }
 
 /* ── Logo ── */
@@ -97,6 +111,16 @@
 .logoVisible {
   opacity: 1;
   transform: scale(1);
+}
+
+.logo canvas {
+  cursor: grab;
+  pointer-events: auto !important;
+  touch-action: none !important;
+}
+
+.logo:active canvas {
+  cursor: grabbing;
 }
 
 .logoHalo {
@@ -119,6 +143,36 @@
   max-height: 80%;
   width: auto;
   filter: drop-shadow(0 0 30px rgba(201, 0, 37, 0.6));
+}
+
+.titleLogo {
+  grid-row: 1 / 4;
+  grid-column: 1;
+  width: min(94vw, 1180px);
+  max-height: 78vh;
+  object-fit: contain;
+  filter: drop-shadow(0 0 34px rgba(201, 0, 37, 0.7));
+  opacity: 0;
+  transform: scale(0.98);
+  transition: opacity 0.7s ease, transform 0.9s var(--ease-out);
+  pointer-events: none;
+}
+
+.titleLogoVisible {
+  opacity: 1;
+  transform: scale(1);
+  animation: titleFlicker 3.2s steps(1, end) both;
+}
+
+.titleLogoHidden {
+  opacity: 0;
+  animation: none;
+}
+
+@keyframes titleFlicker {
+  0%, 12%, 20%, 31%, 39%, 56%, 100% { opacity: 1; }
+  13%, 19%, 32%, 38%, 57%, 64% { opacity: 0.08; }
+  65% { opacity: 0.72; }
 }
 
 /* ── Bouton ── */

@@ -135,21 +135,21 @@
 }
 
 /* Mobile : barre horizontale compacte en bas, défilable */
-@media (max-width: 700px) {
+@container (max-width: 700px) {
   .bar {
     top: auto;
     bottom: 10px;
     right: 50%;
     transform: translateX(50%);
     flex-direction: row;
-    max-width: calc(100% - 20px);
-    overflow-x: auto;
-    padding: 5px;
-    gap: 4px;
-    scrollbar-width: none;
+    width: min(350px, calc(100vw - 24px));
+    max-width: none;
+    justify-content: space-between;
+    overflow: visible;
+    padding: 4px;
+    gap: 0;
   }
 
-  .bar::-webkit-scrollbar { display: none; }
   .title { display: none; }
   .item { width: 40px; height: 46px; flex: 0 0 auto; }
   .item:hover:not(:disabled) { transform: none; }

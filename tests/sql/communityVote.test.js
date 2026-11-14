@@ -15,6 +15,8 @@ const migration = fs.readFileSync(path.join(root, 'supabase/migrations/202610291
 const seed = fs.readFileSync(path.join(root, 'supabase/seed_creations.sql'), 'utf8');
 const legacy = fs.readFileSync(path.join(root, 'supabase-setup.sql'), 'utf8');
 const newsletter = fs.readFileSync(path.join(root, 'supabase/migrations/20261031120000_newsletter.sql'), 'utf8');
+const preorders = fs.readFileSync(path.join(root, 'supabase/migrations/20261105120000_preorders.sql'), 'utf8');
+const candidateVote = fs.readFileSync(path.join(root, 'supabase/migrations/20261105130000_open_candidate_vote.sql'), 'utf8');
 
 let db;
 
@@ -49,6 +51,16 @@ beforeAll(async () => {
   await db.exec(newsletter);
   await db.exec(seed);
   await db.exec(seed);                  // relancer le seed ne duplique rien
+  await db.exec(preorders);
+  await db.exec(preorders);              // idempotence sur la table précommandes V1
+  await setStatus('open');
+  await vote('love-in-darkness', 'Ada', 'Lovelace', 'existingvote');
+  await db.exec(`update public.drop_settings set vote_status = 'announced',
+    closes_at = now() - interval '1 minute',
+    winner_creation_id = (select id from public.creations where slug = 'world-love'),
+    winner_announced_at = now() where id = 1`);
+  await db.exec(candidateVote);
+  await db.exec(candidateVote);          // idempotence, sans doublonner ni effacer les votes
 }, 60000);
 
 describe('migration', () => {
@@ -57,11 +69,33 @@ describe('migration', () => {
     expect(rows.map((r) => r.policyname)).not.toContain('preorders_select_public');
   });
 
-  it('initialise 7 créations sans doublon et un drop en préparation', async () => {
+  it('initialise les créations et un drop en vote ouvert', async () => {
     const o = await overview();
-    expect(o.creations).toHaveLength(7);
-    expect(o.drop.vote_status).toBe('preparing');
+    expect(o.creations).toHaveLength(8);
+    expect(o.drop.vote_status).toBe('open');
     expect(o.drop.winner_slug).toBeNull();
+  });
+
+  it('ouvre les six candidates sans date de fermeture et conserve les compteurs par création', async () => {
+    const o = await overview();
+    const candidates = o.creations.filter((creation) => creation.is_candidate);
+    expect(candidates.map((creation) => creation.slug).sort()).toEqual([
+      'fabulous-love-and-faith',
+      'heart-of-ice',
+      'love-in-darkness',
+      'lva',
+      'plva',
+      'world-love',
+    ]);
+    expect(o.creations.find((creation) => creation.slug === 'batman-drop-01'))
+      .toMatchObject({ is_candidate: false, status: 'preparing', votes: 0 });
+    expect(o.creations.find((creation) => creation.slug === 'masks-and-hearts'))
+      .toMatchObject({ is_candidate: false, status: 'historic', votes: 0 });
+    expect(o.creations.find((creation) => creation.slug === 'love-in-darkness').votes).toBe(1);
+    const { rows } = await db.query('select closes_at from public.drop_settings where id = 1');
+    expect(rows[0].closes_at).toBeNull();
+    const history = await db.query('select winner_slug from public.drop_announcement_history');
+    expect(history.rows.map((row) => row.winner_slug)).toEqual(['world-love']);
   });
 });
 
@@ -85,17 +119,28 @@ describe('accès anonymes', () => {
   });
   it('peut lire les créations actives (sans données personnelles)', async () => {
     const { rows } = await asAnon('select slug from public.creations');
-    expect(rows.length).toBe(7);
+    expect(rows.length).toBe(8);
+  });
+
+  it('peut enregistrer une précommande et consulter uniquement son nombre', async () => {
+    await asAnon(`insert into public.preorders
+      (creation_slug, first_name, last_name, email, product, size, quantity)
+      values ('batman-drop-01', 'Ada', 'Lovelace', 'ada@example.test', 'long', 'M', 1)`);
+    const { rows } = await asAnon('select public.count_preorders() as total');
+    expect(Number(rows[0].total)).toBe(1);
+    await expect(asAnon('select email from public.preorders')).rejects.toThrow(/permission denied/);
   });
 });
 
 describe('cast_vote', () => {
   it('refuse tant que le vote n\'est pas ouvert', async () => {
+    await setStatus('preparing');
     expect((await vote('world-love', 'Ada', 'L', 'ada')).code).toBe('voting_closed');
   });
 
   it('enregistre un vote valide et met à jour le compteur', async () => {
     await setStatus('open');
+    expect((await vote('batman-drop-01', 'Ada', 'Lovelace', 'batmantry')).code).toBe('not_eligible');
     const r = await vote('heart-of-ice', 'Ada', 'Lovelace', '@Exemple');
     expect(r).toMatchObject({ ok: true, code: 'ok', votes: 1 });
     expect(await votesOf('heart-of-ice')).toBe(1);
@@ -142,11 +187,12 @@ describe('cast_vote', () => {
     expect(await votesOf('world-love')).toBe(1);
   });
 
-  it('refuse après closes_at même si le statut est resté « open »', async () => {
-    await db.exec(`update public.drop_settings set vote_status = 'open', closes_at = now() - interval '1 minute' where id = 1`);
-    expect((await vote('lva', 'A', 'B', 'late')).code).toBe('voting_closed');
-    expect((await overview()).drop.vote_status).toBe('closed');
-    await db.exec(`update public.drop_settings set closes_at = null where id = 1`);
+  it('interdit une date de fermeture automatique : seule la fermeture manuelle est autorisée', async () => {
+    await db.exec(`update public.drop_settings set vote_status = 'open', closes_at = null where id = 1`);
+    await expect(
+      db.exec(`update public.drop_settings set closes_at = now() - interval '1 minute' where id = 1`),
+    ).rejects.toThrow(/drop_settings_manual_closure_only/);
+    expect((await overview()).drop.vote_status).toBe('open');
   });
 
   it('le gagnant officiel n\'existe que via drop_settings, après annonce', async () => {

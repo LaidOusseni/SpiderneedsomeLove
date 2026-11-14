@@ -98,6 +98,11 @@
 
 .row:hover { border-color: rgba(255, 255, 255, 0.4); }
 .rowWinner { border-color: rgba(201, 164, 92, 0.75); background: linear-gradient(90deg, rgba(50, 34, 8, 0.9), rgba(12, 6, 2, 0.95)); }
+.rowLeader {
+  border-color: rgba(255, 49, 77, 0.86);
+  background: linear-gradient(90deg, rgba(105, 0, 16, 0.76), rgba(15, 1, 3, 0.96));
+  box-shadow: 0 0 24px rgba(255, 31, 61, 0.18);
+}
 
 .rank {
   display: flex;
@@ -109,6 +114,7 @@
   font-size: 1.6rem;
   line-height: 1;
 }
+.rowLeader .rank { color: #ff8292; text-shadow: 0 0 18px rgba(255, 31, 61, 0.65); }
 .rank small { font-family: var(--font-body); font-style: normal; font-weight: 500; font-size: 0.6rem; color: var(--text-muted); margin-top: 4px; }
 
 .identity {

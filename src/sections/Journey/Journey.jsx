@@ -101,9 +101,9 @@ function Leaderboard() {
           const c = getCreation(row.slug);
           const status = resolveCreationStatus(c, results);
           return (
-            <li key={row.slug} className={`${styles.row} ${status === 'winner' ? styles.rowWinner : ''}`}>
+            <li key={`${row.slug}-${row.rank ?? 'unranked'}`} className={`${styles.row} ${status === 'winner' ? styles.rowWinner : ''} ${row.isLeader && ['open', 'closed'].includes(voteStatus) ? styles.rowLeader : ''}`}>
               <span className={styles.rank} aria-label={row.rank ? `Rang ${row.rank}${row.tied ? ' (ex æquo)' : ''}` : 'Pas encore classé'}>
-                {row.rank ? `#${row.rank}` : '—'}
+                {row.rank ? String(row.rank).padStart(2, '0') : '—'}
                 {row.tied && <small>ex æquo</small>}
               </span>
               <Link to={`/propager/${c.slug}`} className={styles.identity}>
