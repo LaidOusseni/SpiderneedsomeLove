@@ -15,6 +15,53 @@ const T_TITLE = 3200;
 const T_PHRASE = 3100;
 const T_LOGO_3D = 1600;
 const T_LEAVE = 950;
+const INTRO_SOUND = '/sound/intro-startup.mp3';
+const SOUND_VOLUME = 0.7;
+
+/**
+ * Son de démarrage : joué uniquement pendant l'intro, coupé en fondu quand on entre dans le site.
+ * Si le navigateur bloque la lecture automatique avec son, elle démarre au premier geste sur l'intro.
+ */
+function useIntroSound() {
+  const audioRef = useRef(null);
+  const stoppedRef = useRef(false);
+
+  useEffect(() => {
+    const audio = new Audio(INTRO_SOUND);
+    audio.preload = 'auto';
+    audio.volume = SOUND_VOLUME;
+    audioRef.current = audio;
+    const events = ['pointerdown', 'keydown', 'touchstart'];
+    const unlock = (event) => {
+      events.forEach((e) => window.removeEventListener(e, unlock, true));
+      if (event?.target?.closest?.('[data-intro-enter]')) return; // le clic d'entrée ne déclenche pas le son
+      if (!stoppedRef.current && audio.paused) audio.play().catch(() => {});
+    };
+    audio.play().catch(() => events.forEach((e) => window.addEventListener(e, unlock, { capture: true, passive: true })));
+    return () => {
+      events.forEach((e) => window.removeEventListener(e, unlock, true));
+      stoppedRef.current = true;
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
+    };
+  }, []);
+
+  return useCallback((duration) => {
+    stoppedRef.current = true;
+    const audio = audioRef.current;
+    if (!audio || audio.paused) return;
+    const start = audio.volume;
+    const t0 = performance.now();
+    const step = (now) => {
+      const k = Math.min(1, (now - t0) / duration);
+      audio.volume = Math.max(0, start * (1 - k));
+      if (k < 1) requestAnimationFrame(step);
+      else audio.pause();
+    };
+    requestAnimationFrame(step);
+  }, []);
+}
 
 const Intro = ({ onEnter }) => {
   const [reducedMotion] = useState(prefersReducedMotion);
@@ -22,6 +69,7 @@ const Intro = ({ onEnter }) => {
   const [logoFailed, setLogoFailed] = useState(() => !hasWebGL());
   const leaving = useRef(false);
   const buttonRef = useRef(null);
+  const fadeOutSound = useIntroSound();
 
   useEffect(() => {
     if (!['title', 'phrase', 'phraseExit', 'logo3d'].includes(phase)) return undefined;
@@ -51,8 +99,9 @@ const Intro = ({ onEnter }) => {
     if (leaving.current) return;
     leaving.current = true;
     setPhase('leaving');
+    fadeOutSound(reducedMotion ? 120 : T_LEAVE - 100);
     setTimeout(onEnter, reducedMotion ? 150 : T_LEAVE);
-  }, [onEnter, reducedMotion]);
+  }, [onEnter, reducedMotion, fadeOutSound]);
 
   const showPhrase = phase === 'phrase';
   const showTitle = phase === 'title';
@@ -109,6 +158,7 @@ const Intro = ({ onEnter }) => {
         <div className={styles.ctaWrap}>
           <button
             ref={buttonRef}
+            data-intro-enter
             type="button"
             className={`${styles.cta} ${phase === 'cta' || phase === 'leaving' ? styles.ctaVisible : ''}`}
             onClick={handleEnter}
