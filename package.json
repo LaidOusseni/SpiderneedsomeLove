@@ -16,7 +16,8 @@
     "check:vote": "node scripts/e2e-vote.mjs",
     "mockups:cutout": "node scripts/cutout-mockups.mjs",
     "check:refonte": "node scripts/e2e-refonte.mjs",
-    "figurine:optimize": "node scripts/figurine/optimize-glb.mjs"
+    "figurine:optimize": "node scripts/figurine/optimize-glb.mjs",
+    "seo:assets": "node scripts/seo-assets.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",

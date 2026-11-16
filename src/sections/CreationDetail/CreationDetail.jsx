@@ -4,7 +4,7 @@ import styles from './CreationDetail.module.css';
 import { CANDIDATES, CREATIONS, getCreation } from '../../constants/creations';
 import { useVoteResults } from '../../context/VoteResultsContext';
 import { canVote, resolveCreationStatus } from '../../utils/creationStatus';
-import { computeStandings } from '../../utils/voteStats';
+import { computeStandings, formatShare, formatVotes } from '../../utils/voteStats';
 import { VOTE_TEXTS } from '../../constants/site';
 import StatusBadge from '../../components/StatusBadge/StatusBadge';
 import ProgressGauge from '../../components/ProgressGauge/ProgressGauge';
@@ -112,6 +112,22 @@ function VotePanel({ creation, status, results, onVote }) {
   );
 }
 
+/** Ligne d'état mobile : précommandes (drop actuel) ou votes (candidates), chiffres issus de Supabase. */
+function statusLine(creation, status, results, preorderCount) {
+  if (status === 'current_drop') {
+    return Number.isInteger(preorderCount)
+      ? `Précommandes ouvertes · ${preorderCount} intéressé${preorderCount > 1 ? 's' : ''}`
+      : 'Précommandes ouvertes';
+  }
+  if (status === 'historic') return 'Déjà sorti — hors compétition';
+  if (results.status !== 'ready') return results.status === 'loading' ? 'Chargement des votes…' : 'Votes momentanément indisponibles';
+  const { rows } = computeStandings(CANDIDATES.map((c) => ({ slug: c.slug, votes: results.bySlug[c.slug]?.votes ?? 0 })));
+  const row = rows.find((r) => r.slug === creation.slug);
+  const open = canVote(creation, results);
+  if (!row) return open ? 'Votes ouverts' : 'Votes fermés';
+  return `${open ? 'Votes ouverts' : 'Votes fermés'} · ${formatVotes(row.votes)} · ${formatShare(row.share)}`;
+}
+
 const CreationDetail = () => {
   const { slug } = useParams();
   const creation = getCreation(slug);
@@ -172,11 +188,11 @@ const CreationDetail = () => {
     <article className={styles.page}>
       <div className={styles.topBar}>
         <Link to={`/propager?c=${creation.slug}`} className={styles.back}>← Retour à la sélection</Link>
-        <StatusBadge status={status} />
+        <StatusBadge status={status} className={styles.topBadge} />
       </div>
 
       <header className={styles.hero}>
-        <div className={styles.viewerBox}>
+        <div className={`${styles.viewerBox} ${viewMode === '2d' ? styles.viewerBox2d : ''}`}>
           <div className={styles.modeBar}>
             <ViewModeToggle mode={viewMode} onChange={setViewMode} can3D={can3D} />
           </div>
@@ -197,6 +213,9 @@ const CreationDetail = () => {
         </div>
 
         <div className={styles.intro}>
+          <p className={styles.counter}>
+            N° {String(i + 1).padStart(2, '0')} <span>/ {String(CREATIONS.length).padStart(2, '0')}</span>
+          </p>
           <p className={styles.kicker}>
             {status === 'current_drop'
               ? 'DROP ACTUEL — PRÉCOMMANDES OUVERTES'
@@ -206,6 +225,32 @@ const CreationDetail = () => {
           </p>
           <h1 className={styles.name}>{creation.name}</h1>
           {creation.subtitle && <p className={styles.subtitle}>{creation.subtitle}</p>}
+
+          {/* Mobile : statut, état des précommandes / votes, sélecteur 2D / 3D et action principale */}
+          <div className={styles.mobileInfo}>
+            <div className={styles.statusRow}>
+              <StatusBadge status={status} />
+              <p className={styles.statusLine}>{statusLine(creation, status, results, preorderCount)}</p>
+            </div>
+            <ViewModeToggle mode={viewMode} onChange={setViewMode} can3D={can3D} />
+            {creation.isCurrentDrop ? (
+              <button type="button" className={styles.voteBtn} onClick={openPreorder}>
+                <span className={styles.voteBtnLabel}>Précommander</span>
+                <span className={styles.voteBtnHint}>Sans paiement, sans engagement</span>
+              </button>
+            ) : votableNow ? (
+              <button type="button" className={styles.voteBtn} onClick={openVote}>
+                <span className={styles.voteBtnLabel}>Je choisis ce T-shirt</span>
+                <span className={styles.voteBtnHint}>Voter — gratuit, sans commande</span>
+              </button>
+            ) : (
+              <a href="#histoire" className={styles.voteBtn}>
+                <span className={styles.voteBtnLabel}>Découvrir son histoire</span>
+                <span className={styles.voteBtnHint}>{status === 'historic' ? 'Création déjà sortie' : 'Vote pas encore ouvert'}</span>
+              </a>
+            )}
+          </div>
+
           {creation.tagline && <p className={styles.tagline}>« {creation.tagline} »</p>}
           {creation.message && <blockquote className={styles.message}>{creation.message}</blockquote>}
           <a href="#histoire" className={styles.readMore}>Lire son histoire ↓</a>

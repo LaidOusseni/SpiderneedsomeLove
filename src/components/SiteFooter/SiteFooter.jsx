@@ -95,6 +95,10 @@ const SiteFooter = () => {
         <div className={`${styles.columns} ${styles.columnsRight}`}>{right.map((c) => <Column key={c.id} column={c} />)}</div>
       </div>
 
+      {/* Mobile : le logo « Titre intro » remplace le grand mot détouré (trop large pour un téléphone) */}
+      <img src={BRAND_ASSETS.titleIntro} alt="" aria-hidden="true" width="680" height="367"
+        className={styles.titleIntro} loading="lazy" decoding="async" />
+
       <p className={styles.wordmark} aria-hidden="true">Love<span>&amp;</span>Faith</p>
 
       <p className={styles.values} aria-label="Nos valeurs">

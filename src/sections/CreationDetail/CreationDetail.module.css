@@ -430,10 +430,67 @@
 .pagerLink strong { font-family: var(--font-title); font-style: italic; font-size: 1.3rem; }
 .pagerNext { text-align: right; }
 
+.intro { min-width: 0; }
+
+/* Infos mobiles : masquées sur ordinateur (le sélecteur est dans la scène, le vote dans le panneau) */
+.mobileInfo { display: none; }
+
+.counter {
+  margin-bottom: 6px;
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  color: var(--color-white);
+}
+.counter span { color: var(--text-faint); }
+
+.statusRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.statusLine {
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
 @media (max-width: 900px) {
+  .page { padding-inline: 12px; }
   .hero, .body { grid-template-columns: 1fr; }
-  .viewerBox { height: 58dvh; min-height: 340px; }
+  .hero { gap: var(--space-lg); }
+  .topBar .topBadge { display: none; }
+  .back { min-height: 44px; display: inline-flex; align-items: center; }
+
+  /* 3D : scène de hauteur fixe ; 2D : hauteur naturelle des mockups, trame comics */
+  .viewerBox { height: min(62svh, 560px); min-height: 340px; border-radius: var(--radius-lg); }
+  .viewerBox .modeBar { display: none; }
+  .viewerBox2d {
+    height: auto;
+    min-height: 0;
+    padding: 10px;
+    background:
+      radial-gradient(circle, rgba(255, 31, 61, 0.2) 1px, transparent 1.5px) 0 0 / 9px 9px,
+      radial-gradient(ellipse 60% 55% at 50% 45%, rgba(201, 0, 37, 0.32), transparent 75%),
+      #050001;
+  }
+  .viewerBox2d .viewerPane2d { position: relative; inset: auto; }
+
+  .kicker { display: none; }
+  .name { font-size: clamp(2.2rem, 10vw, 3.2rem); margin: 2px 0 4px; }
+  .mobileInfo { display: flex; flex-direction: column; gap: 14px; margin-top: var(--space-md); }
+  .mobileInfo .voteBtn { width: 100%; justify-content: center; text-align: center; }
+  .message { margin-top: var(--space-lg); }
+  .readMore { margin-top: var(--space-lg); }
+
   .votePanel { position: static; }
+  .pagerLink strong { font-size: 1.1rem; overflow-wrap: anywhere; }
+}
+
+@media (max-width: 380px) {
+  .page { padding-inline: 8px; }
+  .viewerBox2d { padding: 8px; }
 }
 
 @media (max-width: 560px) {

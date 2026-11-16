@@ -290,32 +290,61 @@
   .community { grid-template-columns: 1fr; }
 }
 
-/* Mobile : chaque ligne devient une carte (rang, nom, vignette, puis score) */
+/* Mobile : chaque création devient une petite carte (rang, nom, miniature, votes, barre proportionnelle) */
 @media (max-width: 680px) {
+  .journey { padding-inline: 12px; gap: var(--space-xl); }
   .preorderCounter { grid-template-columns: 1fr; gap: var(--space-md); }
   .preorderResult { text-align: left; }
-  .preorderStatement { justify-content: flex-start; }
+  .preorderStatement { justify-content: flex-start; flex-wrap: wrap; }
+  .banner { padding: var(--space-md); }
+  .bannerText, .bannerBody { min-width: 0; }
+
+  .tableWrap { border: 0; border-radius: 0; background: none; overflow: visible; }
   .table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   .table, .table tbody { display: block; }
+  .table tbody { display: grid; gap: 10px; }
+
   .row {
     display: grid;
-    grid-template-columns: 52px minmax(0, 1fr) auto;
-    grid-template-areas: 'rank name logo' 'votes votes votes';
+    grid-template-columns: 56px minmax(0, 1fr);
+    grid-template-areas: 'rank name' 'logo votes';
     align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    gap: 10px 14px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: linear-gradient(180deg, rgba(26, 4, 7, 0.94), rgba(8, 1, 2, 0.96));
   }
-  .row td { display: block; width: auto; padding: 10px 12px; border: 0; }
-  .row td.colRank { grid-area: rank; padding-right: 0; }
-  .row td.colName { grid-area: name; }
-  .row td.colLogo { grid-area: logo; padding-left: 0; }
-  .row td.colVotes { grid-area: votes; padding-top: 0; }
+  .row td, .row:hover td, .rowFirst td, .rowWinner td { display: block; width: auto; padding: 0; border: 0; background: none; }
   .rowFirst td:first-child { box-shadow: none; }
-  .rowFirst { box-shadow: inset 4px 0 0 var(--color-red-glow); background: linear-gradient(90deg, rgba(150, 0, 22, 0.42), rgba(60, 0, 8, 0.15)); }
-  .rowFirst td { background: none; }
-  .rank { font-size: 1.5rem; }
+  .rowFirst {
+    border-color: rgba(255, 31, 61, 0.7);
+    background: linear-gradient(100deg, rgba(150, 0, 22, 0.5), rgba(20, 2, 4, 0.95) 70%);
+    box-shadow: inset 4px 0 0 var(--color-red-glow), 0 0 22px rgba(255, 31, 61, 0.22);
+  }
+  .rowWinner { border-color: rgba(201, 164, 92, 0.7); background: linear-gradient(100deg, rgba(70, 48, 10, 0.55), rgba(20, 12, 2, 0.9) 70%); }
+
+  .row td.colRank { grid-area: rank; display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 4px; }
+  .row td.colName { grid-area: name; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; min-width: 0; }
+  .row td.colLogo { grid-area: logo; }
+  .row td.colVotes { grid-area: votes; min-width: 0; }
+
+  .rank { font-size: 1.7rem; }
+  .crown { margin-left: 2px; }
+  .tie { margin-top: 0; }
+  .nameLink { margin-bottom: 0; min-width: 0; }
+  .nameLink strong { font-size: 1.2rem; overflow-wrap: anywhere; }
+  .thumbs { display: block; }
+  .icon { width: 56px; height: 56px; border-radius: 10px; }
   .mockup { display: none; }
-  .icon { width: 44px; height: 44px; }
+  .count strong { font-size: 1.35rem; }
+  .bar { height: 8px; }
+  .voteLink { min-height: 36px; display: inline-flex; align-items: center; margin-top: 10px; }
+  .discover { display: inline-flex; min-height: 36px; align-items: center; }
+
   .stepList { grid-template-columns: 1fr; }
+  .socials li { flex: 1 1 140px; }
+  .social { min-width: 0; }
 }
 
 .summary {

@@ -12,6 +12,7 @@ const NavBar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const menuButtonRef = useRef(null);
+  const navRef = useRef(null);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -25,15 +26,23 @@ const NavBar = () => {
         menuButtonRef.current?.focus();
       }
     };
+    // Toucher en dehors de la barre : le menu se referme
+    const closeOnOutside = (event) => {
+      if (navRef.current && !navRef.current.contains(event.target)) setMenuOpen(false);
+    };
     window.addEventListener('keydown', closeOnEscape);
-    return () => window.removeEventListener('keydown', closeOnEscape);
+    document.addEventListener('pointerdown', closeOnOutside);
+    return () => {
+      window.removeEventListener('keydown', closeOnEscape);
+      document.removeEventListener('pointerdown', closeOnOutside);
+    };
   }, [menuOpen]);
 
   const closeMenu = () => setMenuOpen(false);
 
   return (
     <header className={styles.wrap}>
-      <nav className={`${styles.bar} ${menuOpen ? styles.menuOpen : ''}`} aria-label="Navigation principale">
+      <nav ref={navRef} className={`${styles.bar} ${menuOpen ? styles.menuOpen : ''}`} aria-label="Navigation principale">
         <NavLink to="/propager" className={styles.brand} aria-label="Love&Faith — accueil" onClick={closeMenu}>
           <img src={BRAND_ASSETS.logo2d} alt="" className={styles.logo} />
         </NavLink>

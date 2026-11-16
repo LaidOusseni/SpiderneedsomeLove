@@ -34,3 +34,35 @@
 }
 
 .icon { font-style: normal; font-size: 0.85em; }
+
+/* Mobile / tablette : deux boutons de même taille, pleine largeur, faciles à toucher */
+@media (max-width: 900px) {
+  .toggle {
+    display: flex;
+    width: 100%;
+    gap: 6px;
+    padding: 5px;
+    border-radius: var(--radius-lg);
+    border-color: rgba(255, 255, 255, 0.35);
+    backdrop-filter: none;
+  }
+  .btn {
+    flex: 1 1 0;
+    justify-content: center;
+    min-height: 48px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(0, 0, 0, 0.55);
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 1.02rem;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .active {
+    border-color: rgba(255, 255, 255, 0.55);
+    background: linear-gradient(180deg, #d4002a, #7a000e);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
+}

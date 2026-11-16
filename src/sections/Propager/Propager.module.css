@@ -401,7 +401,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 16px;
+  padding: 12px;
   margin-bottom: 10px;
   border-radius: var(--radius-lg);
   border: 1px solid rgba(255, 49, 77, 0.8);
@@ -409,23 +409,34 @@
   box-shadow: 0 0 28px rgba(255, 31, 61, 0.28);
 }
 
-.currentDropIcon {
-  width: 100%;
-  max-height: 120px;
-  aspect-ratio: 1.8;
-  object-fit: cover;
+.currentDropMedia {
+  display: block;
+  overflow: hidden;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #0a0102;
+}
+
+/* Visuel au format natif (≈ 4:3) : rien n'est rogné, rien n'est étiré */
+.currentDropIcon {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 398 / 292;
+  object-fit: cover;
+  transition: transform 0.5s var(--ease-out);
 }
 
 .currentDropBadge {
   display: inline-block;
   align-self: flex-start;
+  margin-top: 4px;
   padding: 5px 10px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(190, 0, 30, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   font-size: 0.62rem;
+  font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--color-white);
@@ -435,41 +446,64 @@
   font-family: var(--font-title);
   font-style: italic;
   font-weight: 900;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   line-height: 1;
 }
 
 .currentDropStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--color-red-glow);
+  box-shadow: 0 0 10px rgba(255, 31, 61, 0.9);
 }
 
 .currentDropButton {
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  min-height: 42px;
+  min-height: 48px;
+  margin-top: 2px;
   padding: 10px 18px;
+  border: 1.5px solid var(--border-strong);
   border-radius: var(--radius-pill);
   background: linear-gradient(180deg, #d4002a, #7a000e);
   color: var(--color-white);
   font-family: var(--font-title);
   font-style: italic;
   font-weight: 900;
+  font-size: 1.1rem;
   box-shadow: var(--glow-red);
+  transition: box-shadow var(--transition-base), transform var(--transition-fast);
 }
 
+@media (hover: hover) {
+  .currentDropButton:hover { box-shadow: var(--glow-red-strong); transform: translateY(-1px); }
+  .currentDropMedia:hover .currentDropIcon { transform: scale(1.04); }
+}
+.currentDropButton:active { transform: scale(0.98); }
+
+/* ── Cartes des créations : grille, jamais de défilement horizontal ── */
 .tiles {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
-
 .tile {
   position: relative;
   display: flex;
   flex-direction: column;
+  min-width: 0;
   border-radius: 6px;
   overflow: hidden;
   background: #000;
@@ -477,31 +511,47 @@
   clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
   transition: transform 0.25s var(--ease-out), border-color 0.25s ease, box-shadow 0.25s ease;
   text-align: left;
+  -webkit-tap-highlight-color: transparent;
 }
 
+/* Visuel entier (cadre 3:4, contenu jamais rogné) sur trame comics */
 .tileImgWrap {
+  position: relative;
   display: block;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
+  background:
+    radial-gradient(circle, rgba(255, 31, 61, 0.22) 1px, transparent 1.5px) 0 0 / 8px 8px,
+    radial-gradient(ellipse at 50% 45%, rgba(130, 0, 18, 0.55), #0a0102 75%);
 }
 
 .tileImg {
+  display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.4s var(--ease-out), filter 0.3s ease;
-  filter: brightness(0.82) saturate(0.95);
+  filter: brightness(0.9) saturate(0.95);
 }
 
-.tile:hover,
-.tile:focus-visible {
-  transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.8);
-  box-shadow: none;
+@media (hover: hover) {
+  .tile:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.8);
+  }
+  .tile:hover .tileImg { transform: scale(1.05); filter: brightness(1.05); }
 }
 
-.tile:hover .tileImg,
-.tile:focus-visible .tileImg { transform: scale(1.07); filter: brightness(1.05); }
+.tile:focus-visible { border-color: rgba(255, 255, 255, 0.8); }
+.tile:focus-visible .tileImg { filter: brightness(1.05); }
+
+/* Toucher : léger agrandissement + éclairage rouge (clip-path : lueur intérieure) */
+.tile:active {
+  transform: scale(1.03);
+  border-color: var(--color-red-glow);
+  box-shadow: inset 0 0 0 1px var(--color-red-glow), inset 0 0 28px rgba(255, 31, 61, 0.45);
+}
+.tile:active .tileImg { filter: brightness(1.1); }
 
 .tileSelected {
   border-color: var(--color-red-glow);
@@ -513,27 +563,33 @@
 .tileNum {
   position: absolute;
   top: 6px;
-  left: 8px;
+  left: 6px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.7);
   font-family: var(--font-title);
   font-weight: 900;
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.85);
-  text-shadow: 0 1px 4px #000;
+  line-height: 1.2;
+  color: var(--color-white);
 }
 
 .tileStatus {
   position: absolute;
   top: 6px;
   right: 6px;
+  max-width: calc(100% - 52px);
   padding: 3px 6px;
   border: 1px solid rgba(255, 92, 113, 0.6);
   border-radius: 4px;
-  background: rgba(52, 0, 8, 0.88);
+  background: rgba(52, 0, 8, 0.9);
   color: #ffd4db;
-  font-size: 0.48rem;
+  font-size: 0.52rem;
   font-weight: 800;
+  line-height: 1.2;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  text-align: center;
 }
 
 .tileStatusCurrent {
@@ -548,37 +604,24 @@
   color: #d3c7c9;
 }
 
+/* Nom complet, sur deux lignes si besoin — jamais de points de suspension */
 .tileName {
   display: block;
-  padding: 6px 8px 8px;
+  flex: 1;
+  padding: 7px 10px 9px;
   font-family: var(--font-title);
   font-style: italic;
   font-weight: 900;
-  font-size: 0.86rem;
-  line-height: 1.1;
+  font-size: 0.9rem;
+  line-height: 1.15;
   background: linear-gradient(180deg, #2a0004, #0b0102);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.tileTag {
-  position: absolute;
-  left: 6px;
-  bottom: 34px;
-  padding: 1px 7px;
-  border-radius: 3px;
-  background: rgba(0, 0, 0, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  font-size: 0.62rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 
 .tileP1 {
   position: absolute;
-  top: 6px;
-  right: 16px;
+  right: 6px;
+  bottom: 6px;
   padding: 1px 7px;
   border-radius: 3px;
   background: var(--color-red);
@@ -587,76 +630,130 @@
   letter-spacing: 0.08em;
 }
 
-/* ═══════════ Tablette / mobile ═══════════ */
+/* ═══════════ Tablette / mobile : expérience pensée pour le pouce ═══════════ */
 @media (max-width: 900px) {
   .page {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
     height: auto;
     min-height: 0;
-    padding: 0 12px var(--space-md);
+    padding: 0 12px var(--space-lg);
   }
 
-  .stage { height: min(80dvh, 720px); min-height: 520px; }
-
-  .panel {
-    flex-direction: row;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 12px;
-    scroll-snap-type: x proximity;
-  }
-
-  .panelGroup { flex-shrink: 0; }
-
-  .tiles {
+  /* La scène devient une colonne : visuel → infos → sélecteur → action, sans aucune superposition */
+  .stage {
     display: flex;
-    gap: 8px;
+    flex-direction: column;
+    gap: 14px;
+    height: auto;
+    min-height: 0;
+    padding: 68px 10px 14px;
+    border-radius: var(--radius-lg);
+  }
+  .page:not(.isSelected) .stage { padding-top: 10px; }
+  .page:not(.isSelected) .modeBar,
+  .page:not(.isSelected) .arrow { display: none; }
+
+  .empty {
+    position: static;
+    order: 1;
+    gap: 10px;
+    padding: 18px 8px 12px;
+  }
+  .emptyLogo { width: 64px; }
+  .emptyTitle { font-size: clamp(1.6rem, 7vw, 2.3rem); }
+  .emptyText { font-size: 0.9rem; }
+
+  .viewer {
+    position: relative;
+    inset: auto;
+    order: 1;
+    height: min(62svh, 560px);
+    min-height: 340px;
   }
 
-  .tile { width: 108px; scroll-snap-align: start; }
-
-  .isSelected .panel { opacity: 0.8; filter: saturate(0.6); }
-
-  .viewer { inset: 60px 40px 190px; }
-  .modeBar { top: 10px; left: 10px; }
-  .toolLabel { display: none; }
-  .tool { min-width: 40px; justify-content: center; }
+  /* 2D : hauteur naturelle, trame comics derrière les mockups */
+  .viewer2d {
+    height: auto;
+    min-height: 0;
+    padding: 10px;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background:
+      radial-gradient(circle, rgba(255, 31, 61, 0.2) 1px, transparent 1.5px) 0 0 / 9px 9px,
+      radial-gradient(ellipse at 50% 40%, rgba(150, 0, 22, 0.45), rgba(10, 1, 2, 0.9) 75%);
+  }
 
   .nameplate {
-    left: 14px;
-    right: 14px;
-    bottom: 86px;
+    position: relative;
+    inset: auto;
+    order: 2;
     max-width: none;
+    padding: 0 4px;
   }
-
-  .slash { height: 64px; top: 12px; }
+  .slash { left: -24px; right: -24px; top: 14px; height: 52px; }
+  .name { font-size: clamp(2rem, 9vw, 2.8rem); }
   .tagline { display: none; }
+  .currentDropNotice { display: flex; width: fit-content; }
+
+  .modeBar { position: static; order: 3; }
 
   .actions {
-    left: 14px;
-    right: 14px;
-    bottom: 14px;
+    position: static;
+    order: 4;
+    align-items: stretch;
   }
-  .choose { align-self: stretch; padding: 10px 20px; }
+  .choose { width: 100%; min-height: 60px; padding: 10px 20px; animation-delay: 0.2s; }
+  .voteLink { align-self: center; padding: 8px 4px; }
 
+  /* Outils et flèches regroupés en haut de la scène, hors du visuel */
   .tools { top: 12px; right: 10px; }
-  .tool { padding: 6px 12px; font-size: 0.74rem; }
+  .toolLabel { display: none; }
+  .tool { width: 44px; height: 44px; min-height: 44px; padding: 0; justify-content: center; font-size: 1rem; }
   .dragHint { display: none; }
 
-  .arrow { width: 44px; height: 44px; margin-top: -60px; }
-  .arrowLeft { left: 6px; }
-  .arrowRight { right: 6px; }
+  .arrow { top: 12px; width: 44px; height: 44px; margin-top: 0; font-size: 1.7rem; }
+  .arrowLeft { left: 10px; }
+  .arrowRight { left: 62px; right: auto; }
 
-  .empty { padding: var(--space-lg) 56px; }
+  /* Panneau : défilement vertical naturel de la page */
+  .panel {
+    flex-direction: column;
+    overflow: visible;
+    padding: 14px 12px;
+    border-radius: var(--radius-lg);
+  }
+  .isSelected .panel,
+  .isSelected .panel:hover,
+  .isSelected .panel:focus-within { opacity: 1; filter: none; border-color: rgba(255, 255, 255, 0.45); }
+
+  .panelGroup { display: flex; flex-direction: column; gap: 12px; }
+  .panelTitle { margin: 6px 0 0; line-height: 1.2; }
+  .panelTitle span { margin-left: 0; white-space: nowrap; }
+  .currentDropCard { margin-bottom: 4px; }
+
+  .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 }
 
-@media (max-width: 420px) {
+/* Téléphones : deux créations par ligne */
+@media (max-width: 599px) {
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 380px) {
   .page { padding-inline: 8px; }
-  .stage { min-height: 500px; }
-  .viewer { inset-inline: 30px; }
-  .nameplate { bottom: 82px; }
-  .choose { padding-inline: 12px; }
-  .chooseLabel { font-size: 1.1rem; }
-  .empty { padding-inline: 44px; }
+  .stage { padding-inline: 8px; }
+  .viewer2d { padding: 8px; }
+  .tiles { gap: 10px; }
+  .tileName { font-size: 0.84rem; padding-inline: 8px; }
+  .tileStatus { font-size: 0.48rem; }
+}
+
+/* Réduction des animations demandée par le système */
+@media (prefers-reduced-motion: reduce) {
+  .empty, .viewer, .viewer2d, .counter, .name, .subtitle, .meta, .tagline, .choose { animation: none; }
+  .slash { animation: none; transform: skewX(-18deg); opacity: 0.55; }
+  .tile, .tileImg, .currentDropIcon, .currentDropButton { transition: none; }
+  .tile:active { transform: none; }
 }

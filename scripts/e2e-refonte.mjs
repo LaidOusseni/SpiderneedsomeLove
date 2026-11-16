@@ -448,7 +448,7 @@ try {
     const img = document.querySelector('footer img[src="/brand/lovefaith-kiss.png"]');
     return img?.complete && img.naturalWidth > 0;
   }, { timeout: 8000 });
-  const footerLogos = await page.$$eval('footer img', (imgs) => imgs.map((img) => img.getAttribute('src')));
+  const footerLogos = await page.$$eval('footer [class*="emblem"] img, footer [class*="brand"] img', (imgs) => imgs.map((img) => img.getAttribute('src')));
   const footerText = await page.$eval('footer', (footer) => footer.innerText);
   const kissCentering = await page.$eval('footer [class*="emblem"]', (emblem) => {
     const circle = emblem.querySelector('[class*="circle"]:not([class*="circleRing"])');
@@ -524,11 +524,10 @@ try {
     await wait(700);
     await shot(p, `20-${label}-fiche-2d`);
     if (label === 'mobile') {
-      const dots = await p.$$eval('[aria-label="Face du vêtement"] button', (bs) => bs.filter((b) => b.offsetParent).length);
-      check('Mobile : mockups en carrousel (devant / dos)', dots === 2);
-      await p.click('[aria-label="Face du vêtement"] button:nth-child(2)');
-      await wait(900);
-      await shot(p, `21-${label}-carrousel-dos`);
+      // Plus de carrousel : devant et dos sont visibles ensemble, sans défilement horizontal
+      const faces = await p.$$eval('[class*="viewerPane2d"] figure img', (imgs) => imgs.filter((i) => i.getBoundingClientRect().width > 0).length);
+      const scrolls = await p.$eval('[class*="viewerPane2d"] [class*="track"]', (t) => t.scrollWidth > t.clientWidth + 1);
+      check('Mobile : mockups devant et dos visibles ensemble, sans carrousel', faces === 2 && !scrolls);
     }
     await p.goto(`${BASE}/chemin`, { waitUntil: 'networkidle0' });
     await p.waitForSelector('tbody tr');
@@ -536,6 +535,212 @@ try {
     await p.$eval('footer', (f) => f.scrollIntoView());
     await wait(600);
     await p.screenshot({ path: path.join(SHOTS, `23-${label}-footer.png`), clip: await p.$eval('footer', (f) => { const r = f.getBoundingClientRect(); return { x: 0, y: r.y + window.scrollY - 40, width: window.innerWidth, height: r.height + 40 }; }), captureBeyondViewport: true });
+    check(`${label} : aucune erreur JavaScript`, p.errors.length === 0, p.errors.slice(0, 3).join(' | '));
+    await p.close();
+  }
+  // ═════════ RÉFÉRENCEMENT ═════════
+  {
+    const bot = await browser.newPage();
+    await bot.setUserAgent('Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)');
+    await bot.setRequestInterception(true);
+    bot.on('request', (req) => (req.url().includes('.supabase.co/rest/v1/') ? handle(req) : req.continue()));
+    const raw = await (await fetch(`${BASE}/propager/heart-of-ice`, { headers: { accept: 'text/html' } })).text();
+    check('SEO : HTML de la fiche servi avec titre, canonique, Open Graph et JSON-LD (sans JavaScript)',
+      /<title>Heart of Ice/.test(raw) && /rel="canonical" href="https:\/\/[^"]+\/propager\/heart-of-ice"/.test(raw)
+        && /property="og:image"/.test(raw) && /"alternateName":\[[^\]]*Love and Faith/.test(raw));
+    const sitemap = await (await fetch(`${BASE}/sitemap.xml`)).text();
+    const robots = await (await fetch(`${BASE}/robots.txt`)).text();
+    check('SEO : sitemap.xml (pages + créations) et robots.txt', (sitemap.match(/<loc>/g) ?? []).length >= 12 && /Sitemap: https?:\/\/\S+\/sitemap\.xml/.test(robots));
+    await bot.goto(`${BASE}/`, { waitUntil: 'networkidle0' });
+    const seen = await bot.evaluate(() => ({ h1: document.querySelector('h1')?.textContent, path: location.pathname, title: document.title }));
+    check('SEO : un robot (Googlebot) lit directement le contenu, sans l’intro', seen.path === '/propager' && /propager l'amour/i.test(seen.h1 ?? '') && /Love and Faith/.test(seen.title), JSON.stringify(seen));
+    await bot.goto(`${BASE}/chemin`, { waitUntil: 'networkidle0' });
+    const meta = await bot.evaluate(() => ({ title: document.title, canonical: document.querySelector('link[rel=canonical]')?.href, ld: Boolean(document.getElementById('lf-jsonld')) }));
+    check('SEO : titre et URL canonique mis à jour à la navigation', /chemin de l'amour/i.test(meta.title) && /\/chemin$/.test(meta.canonical ?? '') && meta.ld, JSON.stringify(meta));
+    await bot.close();
+  }
+
+  // ═════════ MOBILE FIRST : plusieurs tailles de téléphone + tablette ═════════
+  const overlaps = (a, b) => a && b && a.bottom > b.top + 1 && b.bottom > a.top + 1 && a.right > b.left + 1 && b.right > a.left + 1;
+  const rectOf = (p, sel) => p.$eval(sel, (el) => { const r = el.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width, height: r.height }; }).catch(() => null);
+  for (const width of [360, 375, 390, 430, 768]) {
+    const vp = { width, height: width >= 768 ? 1024 : 800, isMobile: true, hasTouch: true, deviceScaleFactor: 2 };
+    const label = `${width}px`;
+    const p = await newPage(vp);
+
+    // ── Propager : grille de cartes, pas de carrousel ──
+    await p.goto(`${BASE}/propager`, { waitUntil: 'networkidle0' });
+    await wait(400);
+    check(`${label} /propager : pas de défilement horizontal`, await noHorizontalScroll(p));
+    const grid = await p.$$eval('aside[aria-label="Créations"] [class*="tiles"]', (lists) => lists.map((ul) => ({
+      cols: getComputedStyle(ul).gridTemplateColumns.split(' ').length,
+      scrolls: ul.scrollWidth > ul.clientWidth + 1,
+    })));
+    const panelScrolls = await p.$eval('aside[aria-label="Créations"]', (el) => el.scrollWidth > el.clientWidth + 1);
+    const expectedCols = width < 600 ? 2 : 3;
+    check(`${label} /propager : créations en grille de ${expectedCols} colonnes, sans défilement horizontal`,
+      grid.length === 2 && grid.every((g) => g.cols === expectedCols && !g.scrolls) && !panelScrolls, JSON.stringify(grid));
+    const tiles = await p.$$eval('aside[aria-label="Créations"] button[aria-pressed]', (bs) => bs.map((b) => {
+      const r = b.getBoundingClientRect();
+      const name = b.querySelector('[class*="tileName"]');
+      const num = b.querySelector('[class*="tileNum"]').getBoundingClientRect();
+      const badge = b.querySelector('[class*="tileStatus"]').getBoundingClientRect();
+      const img = b.querySelector('img');
+      return {
+        w: Math.round(r.width), left: r.left, right: r.right,
+        nameCut: name.scrollWidth > name.clientWidth + 1 || getComputedStyle(name).textOverflow === 'ellipsis',
+        badgeOverNum: num.right > badge.left && num.bottom > badge.top,
+        contain: getComputedStyle(img).objectFit === 'contain',
+      };
+    }));
+    check(`${label} /propager : cartes de même largeur, dans l'écran`,
+      tiles.length >= 6 && new Set(tiles.map((t) => t.w)).size === 1 && tiles.every((t) => t.left >= 0 && t.right <= width + 1));
+    check(`${label} /propager : noms complets, numéros et badges sans chevauchement, visuels entiers`,
+      tiles.every((t) => !t.nameCut && !t.badgeOverNum && t.contain), JSON.stringify(tiles.filter((t) => t.nameCut || t.badgeOverNum)));
+    const drop = await p.$eval('aside [class*="currentDropCard"]', (card) => {
+      const kids = [...card.children].map((el) => el.getBoundingClientRect());
+      const btn = card.querySelector('a[class*="currentDropButton"]').getBoundingClientRect();
+      const c = card.getBoundingClientRect();
+      const img = card.querySelector('img');
+      const ir = img.getBoundingClientRect();
+      return {
+        ordered: kids.every((k, i) => i === 0 || k.top >= kids[i - 1].bottom - 1),
+        fullBtn: btn.width >= c.width - 30 && btn.height >= 44,
+        ratio: Math.abs(ir.width / ir.height - img.naturalWidth / img.naturalHeight) < 0.05,
+        height: Math.round(c.height),
+      };
+    });
+    check(`${label} Batman : image → badge → nom → précommandes → bouton pleine largeur`,
+      drop.ordered && drop.fullBtn && drop.ratio, JSON.stringify(drop));
+    await shot(p, `30-${label}-propager`, true);
+
+    // ── Toucher une carte : la création s'ouvre dans la scène ──
+    await p.tap('aside[aria-label="Créations"] button[aria-label^="World Love"]');
+    await p.waitForFunction(() => location.search.includes('world-love'));
+    await wait(1200);
+    const stageTop = await p.$eval('[class*="stage"]', (el) => el.getBoundingClientRect().top);
+    check(`${label} toucher une carte : remonte jusqu'à la création`, stageTop >= 0 && stageTop < 200, `top=${Math.round(stageTop)}`);
+
+    // ── Scène sélectionnée : visuel, infos, sélecteur et action empilés sans chevauchement ──
+    for (const slug of ['batman-drop-01', 'heart-of-ice']) {
+      await p.goto(`${BASE}/propager?c=${slug}`, { waitUntil: 'networkidle0' });
+      await wait(900);
+      const r = {
+        viewer: await rectOf(p, '[class*="viewer2d"]'),
+        plate: await rectOf(p, '[class*="nameplate"]'),
+        mode: await rectOf(p, '[class*="modeBar"]'),
+        actions: await rectOf(p, '[class*="actions"]'),
+        arrow: await rectOf(p, '[class*="arrowRight"]'),
+        tools: await rectOf(p, '[class*="tools"]'),
+      };
+      const stacked = r.viewer.bottom <= r.plate.top + 1 && r.plate.bottom <= r.mode.top + 1 && r.mode.bottom <= r.actions.top + 1;
+      const freeTop = !overlaps(r.arrow, r.viewer) && !overlaps(r.tools, r.viewer) && !overlaps(r.arrow, r.tools);
+      check(`${label} scène ${slug} : mockups → nom/statut → 2D/3D → bouton, sans chevauchement`, stacked && freeTop,
+        JSON.stringify(Object.fromEntries(Object.entries(r).map(([k, v]) => [k, v && [Math.round(v.top), Math.round(v.bottom)]]))));
+      check(`${label} scène ${slug} : pas de défilement horizontal`, await noHorizontalScroll(p));
+      await shot(p, `31-${label}-scene-${slug}`, true);
+    }
+
+    // ── Fiche création : mockups devant / dos, ordre des infos, 2D → 3D ──
+    for (const slug of ['heart-of-ice', 'batman-drop-01']) {
+      let glb = 0;
+      const onReq = (q) => q.url().includes('.glb') && glb++;
+      p.on('request', onReq);
+      await p.goto(`${BASE}/propager/${slug}`, { waitUntil: 'networkidle0' });
+      await wait(900);
+      const faces = await p.$$eval('[class*="viewerPane2d"] figure', (fs) => fs.map((f) => {
+        const img = f.querySelector('img');
+        const r = img.getBoundingClientRect();
+        return { top: Math.round(r.top), left: Math.round(r.left), w: Math.round(r.width), h: Math.round(r.height), loaded: img.complete && img.naturalWidth > 0, ratio: r.width / r.height };
+      }));
+      const trackScroll = await p.$eval('[class*="viewerPane2d"] [class*="track"]', (t) => t.scrollWidth > t.clientWidth + 1);
+      const sideBySide = faces.length === 2 && Math.abs(faces[0].top - faces[1].top) < 2;
+      check(`${label} fiche ${slug} : devant et dos visibles (${sideBySide ? 'côte à côte' : 'empilés'}), ratio respecté, sans carrousel`,
+        faces.length === 2 && faces.every((f) => f.loaded && Math.abs(f.ratio - 0.5625) < 0.02 && f.w >= 120) && !trackScroll, JSON.stringify(faces));
+      const info = await p.$eval('[class*="intro"]', (intro) => {
+        const pick = (sel) => intro.querySelector(sel)?.getBoundingClientRect().top ?? -1;
+        return [pick('[class*="counter"]'), pick('h1'), pick('[class*="statusRow"] > span'), pick('[class*="statusLine"]'),
+          pick('[role="group"][aria-label="Mode d\'affichage"]'), pick('[class*="mobileInfo"] > [class*="voteBtn"]')];
+      });
+      check(`${label} fiche ${slug} : numéro → nom → statut → état → 2D/3D → action`,
+        info.every((t) => t >= 0) && [info[0], info[1], info[2], info[4], info[5]].every((t, i, a) => i === 0 || t > a[i - 1]), JSON.stringify(info.map(Math.round)));
+      const toggle = await p.$$eval('[class*="mobileInfo"] [role="group"] button', (bs) => bs.map((b) => {
+        const r = b.getBoundingClientRect();
+        return { w: Math.round(r.width), h: Math.round(r.height), active: b.getAttribute('aria-pressed') === 'true', bg: getComputedStyle(b).backgroundImage };
+      }));
+      check(`${label} fiche ${slug} : boutons 2D / 3D de même taille, 2D active par défaut`,
+        toggle.length === 2 && Math.abs(toggle[0].w - toggle[1].w) <= 1 && toggle.every((t) => t.h >= 44) && toggle[0].active && !toggle[1].active && glb === 0,
+        JSON.stringify({ toggle: toggle.map(({ w, h, active }) => ({ w, h, active })), glb }));
+      check(`${label} fiche ${slug} : pas de défilement horizontal`, await noHorizontalScroll(p));
+      await shot(p, `32-${label}-fiche-${slug}`, true);
+      if (slug === 'heart-of-ice' && (width === 390 || width === 768)) {
+        await p.tap('[class*="mobileInfo"] [role="group"] button:nth-child(2)');
+        const canvas = await p.waitForSelector('canvas', { timeout: 60000 }).then(() => true, () => false);
+        await wait(1500);
+        const box = await rectOf(p, '[class*="viewerBox"]');
+        check(`${label} fiche : passage en vue 3D (chargement à la demande)`, canvas && glb > 0 && box.height >= 300, `glb=${glb} h=${box && Math.round(box.height)}`);
+        await shot(p, `33-${label}-fiche-3d`);
+        await p.tap('[class*="mobileInfo"] [role="group"] button:nth-child(1)');
+        await wait(600);
+        check(`${label} fiche : retour en vue 2D`, Boolean(await p.$('[class*="viewerPane2d"] figure')));
+      }
+      p.off('request', onReq);
+    }
+
+    // ── Classement : cartes verticales ──
+    await p.goto(`${BASE}/chemin`, { waitUntil: 'networkidle0' });
+    await p.waitForSelector('tbody tr');
+    await wait(1200);
+    const cards = await p.$$eval('tbody tr', (trs) => trs.map((tr) => {
+      const r = tr.getBoundingClientRect();
+      const q = (s) => tr.querySelector(s);
+      return {
+        display: getComputedStyle(tr).display, left: r.left, right: r.right,
+        rank: q('[class*="rank"]')?.textContent.trim(), name: q('strong')?.textContent,
+        thumb: Boolean(q('img[class*="icon"]')?.getBoundingClientRect().width),
+        votes: q('[class*="count"] strong')?.textContent, bar: Boolean(q('[class*="barFill"]')),
+      };
+    }));
+    const cardMode = width <= 680;
+    check(`${label} classement : ${cardMode ? 'cartes' : 'tableau'} avec rang, miniature, nom, votes et barre`,
+      cards.length >= 5 && cards.every((c) => (!cardMode || c.display === 'grid') && c.left >= 0 && c.right <= width + 1 && c.rank && c.name && c.thumb && c.votes !== undefined && c.bar),
+      JSON.stringify(cards.slice(0, 2)));
+    check(`${label} classement : pas de défilement horizontal`, await noHorizontalScroll(p));
+    await shot(p, `34-${label}-classement`, true);
+
+    // ── Footer ──
+    await p.$eval('footer', (f) => f.scrollIntoView());
+    await wait(500);
+    const foot = await p.$eval('footer', (f) => {
+      const out = [...f.querySelectorAll('img, a, h2, p')].filter((el) => {
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && (r.left < -1 || r.right > window.innerWidth + 1);
+      }).map((el) => el.textContent.trim().slice(0, 30) || el.getAttribute('src'));
+      const title = f.querySelector('img[src*="title-intro"]');
+      const legal = f.lastElementChild.getBoundingClientRect();
+      const cols = [...f.querySelectorAll('nav[aria-labelledby^="footer-"]')].map((n) => Math.round(n.getBoundingClientRect().left));
+      return { out, title: title && title.getBoundingClientRect().width > 0, legalLast: legal.bottom >= f.getBoundingClientRect().bottom - 2, cols: new Set(cols).size };
+    });
+    check(`${label} footer : logos visibles, liens en colonnes, mentions en bas, rien ne déborde`,
+      foot.out.length === 0 && foot.legalLast && (width > 720 || (foot.title && foot.cols === 2)), JSON.stringify(foot));
+    await p.screenshot({ path: path.join(SHOTS, `35-${label}-footer.png`), clip: await p.$eval('footer', (f) => { const r = f.getBoundingClientRect(); return { x: 0, y: r.y + window.scrollY - 20, width: window.innerWidth, height: r.height + 20 }; }), captureBeyondViewport: true });
+
+    // ── Menu hamburger ──
+    await p.evaluate(() => window.scrollTo(0, 0));
+    const burger = await rectOf(p, 'button[aria-controls="navigation-links"]');
+    const logo = await rectOf(p, 'header a[class*="brand"]');
+    if (width <= 760) {
+      await p.tap('button[aria-controls="navigation-links"]');
+      await wait(400);
+      const links = await p.$$eval('#navigation-links a', (as) => as.map((a) => { const r = a.getBoundingClientRect(); return { h: r.height, vis: getComputedStyle(a).visibility, right: r.right }; }));
+      check(`${label} menu : logo à gauche, hamburger à droite (≥ 44 px), liens lisibles`,
+        logo.left < burger.left && burger.width >= 44 && burger.height >= 44 && links.length > 0 && links.every((l) => l.h >= 44 && l.vis === 'visible' && l.right <= width + 1),
+        JSON.stringify({ burger, links: links.length }));
+      await shot(p, `36-${label}-menu`);
+      await p.touchscreen.tap(Math.round(width / 2), vp.height - 30);
+      await wait(300);
+      check(`${label} menu : se ferme en touchant à côté`, await p.$eval('button[aria-controls="navigation-links"]', (b) => b.getAttribute('aria-expanded') === 'false'));
+    }
     check(`${label} : aucune erreur JavaScript`, p.errors.length === 0, p.errors.slice(0, 3).join(' | '));
     await p.close();
   }

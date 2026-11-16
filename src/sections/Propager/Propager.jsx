@@ -35,32 +35,59 @@ function Tile({ creation, selected, onSelect, number }) {
       onClick={() => onSelect(creation.slug)}
       onMouseEnter={() => prefetch(creation)}
       onFocus={() => prefetch(creation)}
+      onTouchStart={() => prefetch(creation)}
       aria-pressed={selected}
       aria-label={`${creation.name}${creation.subtitle ? ` — ${creation.subtitle}` : ''} — ${badgeLabel}`}
     >
       <span className={styles.tileImgWrap}>
-        <img src={creation.icon} alt="" className={styles.tileImg} loading="lazy" decoding="async" />
+        <img src={creation.icon} alt="" className={styles.tileImg} loading="lazy" decoding="async"
+          width="360" height="480" />
+        {selected && <span className={styles.tileP1} aria-hidden="true">P1</span>}
       </span>
       <span className={styles.tileNum} aria-hidden="true">{number}</span>
-      <span className={styles.tileName}>{creation.name}</span>
       <span className={`${styles.tileStatus} ${creation.isCurrentDrop ? styles.tileStatusCurrent : ''} ${isHistoric ? styles.tileStatusHistoric : ''}`}>
         {badgeLabel}
       </span>
-      {selected && <span className={styles.tileP1} aria-hidden="true">P1</span>}
+      <span className={styles.tileName}>{creation.name}</span>
     </button>
   );
 }
+
+const MOBILE_QUERY = '(max-width: 900px)';
+const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 const Propager = () => {
   const [params, setParams] = useSearchParams();
   const selected = getCreation(params.get('c'));
   const results = useVoteResults();
   const viewerRef = useRef(null);
+  const stageRef = useRef(null);
   const [can3D] = useState(hasWebGL);
   const [viewMode, changeViewMode] = useViewMode();
   useIdlePrefetch3D(Boolean(selected) && viewMode === '2d');
 
   const select = useCallback((slug) => setParams(slug ? { c: slug } : {}, { replace: true }), [setParams]);
+
+  // Mobile : toucher une carte ouvre la création dans la scène, puis remonte en douceur jusqu'à elle
+  // (une fois la nouvelle sélection affichée, pour viser la position définitive).
+  const scrollPending = useRef(false);
+  const selectFromTile = useCallback((slug) => {
+    scrollPending.current = Boolean(window.matchMedia?.(MOBILE_QUERY).matches);
+    select(slug);
+  }, [select]);
+
+  useEffect(() => {
+    if (!scrollPending.current || !selected) return undefined;
+    scrollPending.current = false;
+    const id = requestAnimationFrame(() => {
+      const el = stageRef.current;
+      if (!el) return;
+      const offset = document.querySelector('header')?.offsetHeight ?? 0;
+      const top = el.getBoundingClientRect().top + window.scrollY - offset - 8;
+      window.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [selected]);
 
   const step = useCallback((dir) => {
     const list = CREATIONS;
@@ -95,7 +122,7 @@ const Propager = () => {
   return (
     <section className={`${styles.page} ${selected ? styles.isSelected : ''}`} aria-label="Propager l'amour — sélection des créations">
       {/* ── Scène ── */}
-      <div className={styles.stage}>
+      <div className={styles.stage} ref={stageRef}>
         <div className={styles.stageBg} aria-hidden="true">
           <div className={styles.grid} />
           <div className={styles.halo} />
@@ -194,29 +221,31 @@ const Propager = () => {
         <div className={styles.panelGroup}>
           {CURRENT_DROP && (
             <div className={styles.currentDropCard}>
-              <img src={CURRENT_DROP.icon} alt="" className={styles.currentDropIcon} />
+              <Link to={`/propager/${CURRENT_DROP.slug}`} className={styles.currentDropMedia} tabIndex={-1} aria-hidden="true">
+                <img src={CURRENT_DROP.icon} alt="" className={styles.currentDropIcon} width="398" height="292" decoding="async" />
+              </Link>
               <span className={styles.currentDropBadge}>DROP ACTUEL</span>
               <h2 className={styles.currentDropTitle}>{CURRENT_DROP.name}</h2>
-              <p className={styles.currentDropStatus}>Précommandes ouvertes</p>
+              <p className={styles.currentDropStatus}><span className={styles.liveDot} aria-hidden="true" />Précommandes ouvertes</p>
               <Link to={`/propager/${CURRENT_DROP.slug}`} className={styles.currentDropButton}>Précommander</Link>
             </div>
           )}
           <h2 className={styles.panelTitle}>
-            Prochaines créations <span>{CANDIDATES.length} candidates</span>
+            Prochaines créations{' '} <span>{CANDIDATES.length} candidates</span>
           </h2>
           <div className={styles.tiles}>
             {CANDIDATES.map((c) => (
               <Tile key={c.slug} creation={c} number={String(c.index + 1).padStart(2, '0')}
-                selected={selected?.slug === c.slug} onSelect={select} />
+                selected={selected?.slug === c.slug} onSelect={selectFromTile} />
             ))}
           </div>
           <h2 className={styles.panelTitle}>
-            Anciens drops <span>{CREATIONS.filter((c) => c.status === 'historic').length}</span>
+            Anciens drops{' '} <span>{CREATIONS.filter((c) => c.status === 'historic').length}</span>
           </h2>
           <div className={styles.tiles}>
             {CREATIONS.filter((c) => c.status === 'historic').map((c) => (
               <Tile key={c.slug} creation={c} number={String(c.index + 1).padStart(2, '0')}
-                selected={selected?.slug === c.slug} onSelect={select} />
+                selected={selected?.slug === c.slug} onSelect={selectFromTile} />
             ))}
           </div>
         </div>

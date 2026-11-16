@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import styles from './MockupView.module.css';
 import Modal from '../Modal/Modal';
 
@@ -30,38 +30,17 @@ const getAspectRatio = (creation, side) => {
 
 /**
  * Vue 2D (affichée par défaut) : les faces côte à côte ou le poster complet.
- * Quand la place manque (mobile, colonne étroite), les faces deviennent un carrousel.
- * Clic : agrandissement.
+ * Sur ordinateur, les mockups remplissent la hauteur de la scène ; sur mobile, ils suivent la largeur
+ * (côte à côte, ou l'un sous l'autre sur les écrans trop étroits) — jamais de défilement horizontal.
+ * Toucher / clic : agrandissement.
  */
 const MockupView = ({ creation }) => {
   const [zoom, setZoom] = useState(null);
-  const [active, setActive] = useState(0);
-  const trackRef = useRef(null);
   const sides = creation.mockups.poster ? POSTER : SIDES;
-
-  useEffect(() => {
-    setActive(0);
-    trackRef.current?.scrollTo({ left: 0 });
-  }, [creation.slug]);
-
-  // Carrousel : face visible (pour les points)
-  const onScroll = () => {
-    const el = trackRef.current;
-    if (!el) return;
-    const i = Math.round(el.scrollLeft / Math.max(1, el.scrollWidth - el.clientWidth));
-    setActive(Number.isFinite(i) ? Math.min(sides.length - 1, Math.max(0, i)) : 0);
-  };
-
-  const goTo = (i) => {
-    const el = trackRef.current;
-    if (!el) return;
-    el.children[i]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    setActive(i);
-  };
 
   return (
     <div className={styles.view}>
-      <div className={styles.track} ref={trackRef} onScroll={onScroll}>
+      <div className={styles.track}>
         {sides.map((s, i) => (
           <figure key={s.key} className={`${styles.slide} ${sides.length === 1 ? styles.slideSingle : ''}`} style={{ '--aspect': getAspectRatio(creation, s.key) }}>
             <button
@@ -78,17 +57,6 @@ const MockupView = ({ creation }) => {
           </figure>
         ))}
       </div>
-
-      {sides.length > 1 && (
-        <div className={styles.dots} role="group" aria-label="Face du vêtement">
-          {sides.map((s, i) => (
-            <button key={s.key} type="button" className={`${styles.dot} ${active === i ? styles.dotActive : ''}`}
-              aria-pressed={active === i} onClick={() => goTo(i)}>
-              {s.label}
-            </button>
-          ))}
-        </div>
-      )}
 
       <Modal isOpen={Boolean(zoom)} onClose={() => setZoom(null)}>
         {zoom && (

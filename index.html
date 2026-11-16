@@ -2,11 +2,16 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/brand/logo-2d.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/brand/icon-192.png" />
+    <link rel="icon" type="image/png" sizes="166x166" href="/brand/logo-2d.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/brand/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#050505" />
-    <meta name="description" content="Love&amp;Faith — Un grand amour vient avec de grandes responsabilités. Choisis la prochaine création de la communauté." />
-    <title>Love&amp;Faith — Propager l'amour</title>
+    <meta name="application-name" content="Love&amp;Faith" />
+    <meta name="apple-mobile-web-app-title" content="Love&amp;Faith" />
+    <meta name="description" content="Love&amp;Faith (Love and Faith) est une marque de vêtements streetwear française inspirée des comics : amour, foi, bienveillance et partage. Découvre le drop actuel et vote pour la prochaine création." />
+    <title>Love&amp;Faith — Love and Faith, marque de vêtements streetwear | Propager l'amour</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -17,6 +22,10 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript id="lf-noscript">
+      <h1>Love&amp;Faith — Love and Faith</h1>
+      <p>Marque de vêtements streetwear inspirée des comics : amour, foi, bienveillance et partage.</p>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

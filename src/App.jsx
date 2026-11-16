@@ -8,6 +8,7 @@ import Journey from './sections/Journey/Journey';
 import Privacy from './sections/Privacy/Privacy';
 import SiteFooter from './components/SiteFooter/SiteFooter';
 import { VoteResultsProvider } from './context/VoteResultsContext';
+import RouteSeo from './components/RouteSeo/RouteSeo';
 import AsciiLogoBackground from './components/AsciiLogoBackground/AsciiLogoBackground';
 import { LEGACY_REDIRECTS } from './constants/navigation';
 import styles from './App.module.css';
@@ -18,6 +19,11 @@ const Unsubscribe = lazy(() => import('./sections/Unsubscribe/Unsubscribe'));
 
 const ENTERED_KEY = 'lf-entered';
 const DIRECT_PATHS = ['/confidentialite', '/mentions-legales', '/newsletter/desinscription'];
+
+// Robots d'indexation et d'aperçu de liens : ils ne cliquent pas sur « Cliquez ici ». L'intro (vidéo plein écran) est
+// donc passée pour eux afin qu'ils lisent le même contenu que le visiteur voit juste après l'intro.
+const CRAWLER_UA = /bot|crawler|spider|slurp|googlebot|bingbot|yandex|baiduspider|duckduckbot|applebot|facebookexternalhit|facebot|twitterbot|linkedinbot|whatsapp|telegrambot|discordbot|pinterest|google-inspectiontool|chrome-lighthouse/i;
+const isCrawler = () => typeof navigator !== 'undefined' && CRAWLER_UA.test(navigator.userAgent || '');
 
 function readEntered() {
   try {
@@ -71,7 +77,7 @@ function Site() {
   const navigate = useNavigate();
   // L'intro s'affiche à la première visite de la session, quelle que soit l'URL d'arrivée,
   // et toujours sur « / ». On n'entre dans le site que par le bouton « Cliquez ici ».
-  const [entered, setEntered] = useState(() => readEntered() && location.pathname !== '/');
+  const [entered, setEntered] = useState(() => isCrawler() || (readEntered() && location.pathname !== '/'));
 
   const handleEnter = useCallback(() => {
     try { sessionStorage.setItem(ENTERED_KEY, '1'); } catch { /* navigation privée */ }
@@ -80,12 +86,13 @@ function Site() {
   }, [location.pathname, navigate]);
 
   // Pages lisibles directement, sans l'intro : confidentialité, mentions légales, désinscription (liens externes / e-mails)
-  if (!entered && !DIRECT_PATHS.includes(location.pathname)) return <Intro onEnter={handleEnter} />;
+  if (!entered && !DIRECT_PATHS.includes(location.pathname)) return <><RouteSeo /><Intro onEnter={handleEnter} /></>;
 
   return (
     <div className={styles.site}>
       <AsciiLogoBackground />
       <ScrollToTop />
+      <RouteSeo />
       <a href="#contenu" className={styles.skip}>Aller au contenu</a>
       <NavBar />
       <main id="contenu" className={styles.main}>

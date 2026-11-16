@@ -70,41 +70,24 @@
   color: var(--text-muted);
 }
 
-/* Points du carrousel : seulement quand les mockups défilent */
-.dots { display: none; justify-content: center; gap: 8px; padding-top: 6px; }
-.dot {
-  min-height: 32px;
-  padding: 4px 14px;
-  border-radius: var(--radius-pill);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-muted);
+/* ── Mobile / tablette : la vue suit la largeur (hauteur naturelle), aucun carrousel ── */
+@media (max-width: 900px) {
+  .view {
+    container: mockups / inline-size;
+    height: auto;
+    min-height: 0;
+  }
+  .track { --gap: clamp(10px, 4cqw, 24px); flex: none; align-items: flex-start; }
+  .slide { width: min(calc((100cqw - var(--gap)) / 2), 300px); }
+  .slideSingle { width: min(100cqw, 460px); }
+  .caption { height: auto; }
+  .faceBtn:active { transform: scale(0.98); }
 }
-.dotActive { background: var(--color-red); border-color: var(--color-red); color: #fff; }
 
-/* Place insuffisante : carrousel à faire glisser (un mockup à la fois) */
-@container mockups (max-width: 520px) {
-  .track {
-    justify-content: flex-start;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    padding-inline: 9cqw;
-    scroll-padding-inline: 9cqw;
-  }
-  .track::-webkit-scrollbar { display: none; }
-  .slide {
-    width: min(82cqw, calc((100cqh - var(--label) - 52px) * var(--aspect)));
-    scroll-snap-align: center;
-  }
-  .slideSingle {
-    width: min(90cqw, calc((100cqh - var(--label) - 52px) * var(--aspect)));
-  }
-  .dots { display: flex; }
+/* Écran trop étroit pour deux visuels lisibles : devant, puis dos */
+@container mockups (max-width: 250px) {
+  .track { flex-direction: column; align-items: center; }
+  .slide { width: min(88cqw, 240px); }
 }
 
 .zoom { width: min(86vw, calc(80vh * var(--aspect, 0.75))); margin: 0 auto; }
