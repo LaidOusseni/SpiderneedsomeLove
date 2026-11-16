@@ -1,2 +1,2 @@
-Set-Location "c:\Users\laido\OneDrive\Documents\Love&Faith Spider"
+Set-Location $PSScriptRoot
 npm run dev

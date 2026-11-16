@@ -26,6 +26,8 @@ export function resolveCreationStatus(creation, results) {
   if (remote && (!remote.isCandidate || remote.status === 'preparing')) return 'preparing';
   if (!remote && creation.status === 'preparing') return 'preparing';
   if (drop && drop.voteStatus !== 'open') return drop.voteStatus === 'preparing' ? 'preparing' : 'closed';
+  if (remote?.voteStatus === 'voting_closed' || remote?.voteStatus === 'selected') return 'closed';
+  if (remote?.voteStatus === 'candidate') return 'preparing';
   return 'candidate';
 }
 
@@ -35,5 +37,7 @@ export function canVote(creation, results) {
   if (results?.status !== 'ready') return false;
   if (results.drop?.voteStatus !== 'open') return false;
   const remote = results.bySlug?.[creation.slug];
-  return Boolean(remote?.isCandidate && remote.status === 'candidate');
+  // voteStatus absent = base antérieure à la migration 20261114 : seul l'interrupteur général compte
+  const open = remote?.voteStatus === undefined || remote.voteStatus === 'voting_open';
+  return Boolean(remote?.isCandidate && remote.status === 'candidate' && open);
 }

@@ -6,17 +6,19 @@ import puppeteer from 'puppeteer-core';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const BASE = process.env.BASE_URL ?? 'http://localhost:4173';
-const OUT = process.argv[2] ?? 'e2e-shots/prints';
-const CHROME = process.env.CHROME_PATH ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:4173';
+const OUT = process.env.SHOTS_DIR ?? process.argv[2] ?? 'D:\\dev-cache\\tmp\\lf-shots\\prints';
+const CHROME_PROFILE = process.env.CHROME_PROFILE ?? 'D:\\dev-cache\\tmp\\chrome-runs';
+const CHROME = process.env.CHROME_PATH ?? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const SLUGS = (process.env.SLUGS ?? 'heart-of-ice,love-in-darkness,world-love,fabulous-love-and-faith,lva,plva,masks-and-hearts').split(',');
 fs.mkdirSync(OUT, { recursive: true });
+fs.mkdirSync(CHROME_PROFILE, { recursive: true });
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const browser = await puppeteer.launch({
   executablePath: CHROME,
   headless: true,
-  ...(process.env.CHROME_PROFILE ? { userDataDir: fs.mkdtempSync(path.join(process.env.CHROME_PROFILE, 'run-')) } : {}),
+  userDataDir: fs.mkdtempSync(path.join(CHROME_PROFILE, 'run-')),
   args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--no-sandbox'],
 });
 try {

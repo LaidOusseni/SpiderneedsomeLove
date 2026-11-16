@@ -6,6 +6,7 @@
  *
  * Pour chaque création :
  *   - front.webp / back.webp : mockups 2D (galerie), proportions d'origine
+ *   - gallery-front.webp / gallery-back.webp : mockups complets de galerie (sans recadrage)
  *   - icon.webp              : icône du panneau de sélection
  *   - print-front.png / print-back.png : motif extrait du mockup (fond tissu rendu transparent),
  *     utilisé comme texture sur le vêtement 3D
@@ -256,6 +257,11 @@ async function main() {
       if (side === 'front' || !entry.fabric) entry.fabric = hex(res.fabric);
       entry[side] = res.print;
       console.log(`${src.slug} ${side}:`, res.print ? res.print.rect.join(' ') : '(pas de motif — dos uni)');
+    }
+
+    for (const side of ['Front', 'Back']) {
+      const file = src[`gallery${side}`];
+      if (file) await toWebp(path.join(ROOT, file), path.join(dir, `gallery-${side.toLowerCase()}.webp`));
     }
 
     // Motif fourni directement (sans mockup exploitable) : ex. Masks & Hearts

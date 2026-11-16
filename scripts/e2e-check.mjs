@@ -2,16 +2,18 @@
  * Vérification de bout en bout dans un vrai Chrome (headless) — npm run check:e2e
  * Prérequis : `npm run build && npx vite preview --port 4173` dans un autre terminal,
  * et Google Chrome installé (ou CHROME_PATH).
- * Les captures sont écrites dans SHOTS_DIR (par défaut ./e2e-shots, ignoré par git).
+ * Les captures sont écrites sur D: par défaut (SHOTS_DIR permet de remplacer le dossier).
  */
 import puppeteer from 'puppeteer-core';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const BASE = process.env.BASE_URL ?? 'http://localhost:4173';
-const SHOTS = process.env.SHOTS_DIR ?? 'e2e-shots';
-const CHROME = process.env.CHROME_PATH ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:4173';
+const SHOTS = process.env.SHOTS_DIR ?? 'D:\\dev-cache\\tmp\\lf-shots\\e2e';
+const CHROME_PROFILE = process.env.CHROME_PROFILE ?? 'D:\\dev-cache\\tmp\\chrome-runs';
+const CHROME = process.env.CHROME_PATH ?? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 fs.mkdirSync(SHOTS, { recursive: true });
+fs.mkdirSync(CHROME_PROFILE, { recursive: true });
 
 const results = [];
 const check = (name, ok, extra = '') => {
@@ -25,7 +27,7 @@ const browser = await puppeteer.launch({
   executablePath: CHROME,
   headless: true,
   // profil neuf à chaque exécution (aucun état mémorisé d'un passage précédent)
-  ...(process.env.CHROME_PROFILE ? { userDataDir: fs.mkdtempSync(path.join(process.env.CHROME_PROFILE, 'run-')) } : {}),
+  userDataDir: fs.mkdtempSync(path.join(CHROME_PROFILE, 'run-')),
   args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--no-sandbox'],
 });
 

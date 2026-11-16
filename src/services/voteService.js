@@ -4,9 +4,10 @@
  * Toutes les interactions Supabase liées au vote communautaire.
  * Les composants React ne doivent JAMAIS importer supabase directement.
  *
- * Le navigateur n'a accès qu'à deux fonctions PostgreSQL (voir supabase/migrations/) :
+ * Le navigateur n'a accès qu'à (voir supabase/migrations/) :
  *   - get_drop_overview() : statut du drop + nombre de votes par création (aucune donnée personnelle)
- *   - cast_vote(...)      : enregistre un vote après contrôle côté serveur
+ *   - drop_vote_totals    : vue du classement des candidates (lecture seule, aucune donnée personnelle)
+ *   - cast_vote(...)      : enregistre un vote après contrôle côté serveur (table drop_votes)
  */
 
 import { supabase } from './supabase';
@@ -33,6 +34,7 @@ function withTimeout(builder) {
 // PGRST202 / 42883 : la fonction n'existe pas encore (migration non appliquée)
 const isMissingFunction = (error) =>
   error && (error.code === 'PGRST202' || error.code === '42883' || /could not find the function/i.test(error.message));
+const isAbortError = (error) => error?.name === 'AbortError' || /abort/i.test(error?.message ?? '');
 
 /**
  * @returns {Promise<{ drop: object|null, creations: Array }>}
@@ -48,6 +50,7 @@ export async function fetchDropOverview() {
   }
   if (res.error) {
     if (isMissingFunction(res.error)) throw new VoteServiceError('unavailable', res.error.message);
+    if (isAbortError(res.error)) throw new VoteServiceError('network', res.error.message);
     console.error('[voteService] get_drop_overview:', res.error.message);
     throw new VoteServiceError('network', res.error.message);
   }
@@ -67,9 +70,45 @@ export async function fetchDropOverview() {
       slug: c.slug,
       status: c.status,
       isCandidate: Boolean(c.is_candidate),
+      // statut de candidature (migration 20261114) : candidate | voting_open | voting_closed | selected | null
+      voteStatus: c.vote_status === undefined ? undefined : c.vote_status,
       votes: Number(c.votes) || 0,
     })),
   };
+}
+
+/**
+ * Classement public (vue `drop_vote_totals`) : candidates uniquement, votes comptés depuis les votes individuels,
+ * rang calculé en base (égalité = même rang, ordre d'affichage stable).
+ * @returns {Promise<Array<{ slug, name, image, votes, rank, position, voteStatus }>>}
+ * @throws VoteServiceError('unavailable' | 'network')
+ */
+export async function fetchVoteTotals() {
+  if (!supabase) throw new VoteServiceError('unavailable', 'Supabase non configuré');
+  let res;
+  try {
+    res = await withTimeout(
+      supabase.from('drop_vote_totals').select('slug, name, image, votes, rank, position, vote_status').order('position'),
+    );
+  } catch (err) {
+    throw new VoteServiceError('network', err?.message ?? 'network');
+  }
+  if (res.error) {
+    // 42P01 / PGRST205 : la vue n'existe pas encore (migration non appliquée)
+    if (['42P01', 'PGRST205', 'PGRST200'].includes(res.error.code)) throw new VoteServiceError('unavailable', res.error.message);
+    if (isAbortError(res.error)) throw new VoteServiceError('network', res.error.message);
+    console.error('[voteService] drop_vote_totals:', res.error.message);
+    throw new VoteServiceError('network', res.error.message);
+  }
+  return (res.data ?? []).map((r) => ({
+    slug: r.slug,
+    name: r.name,
+    image: r.image,
+    votes: Number(r.votes) || 0,
+    rank: Number(r.rank) || null,
+    position: Number(r.position) || 0,
+    voteStatus: r.vote_status,
+  }));
 }
 
 const MESSAGES = {

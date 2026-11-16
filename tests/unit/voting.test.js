@@ -50,16 +50,16 @@ describe('computeStandings', () => {
 });
 
 describe('drop actuel', () => {
-  it('Batman est séparé des six candidates et des anciens drops', () => {
+  it('Batman est séparé des cinq candidates et des anciens drops', () => {
     expect(CURRENT_DROP?.slug).toBe('batman-drop-01');
     expect(CANDIDATES.map((c) => c.slug)).toEqual([
       'heart-of-ice',
-      'love-in-darkness',
       'world-love',
       'fabulous-love-and-faith',
       'lva',
       'plva',
     ]);
+    expect(CANDIDATES.some((c) => c.slug === 'love-in-darkness')).toBe(false);
     expect(CANDIDATES.some((c) => c.status === 'historic')).toBe(false);
   });
 });

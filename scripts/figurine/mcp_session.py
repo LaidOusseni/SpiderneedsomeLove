@@ -22,7 +22,7 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SERVER = os.environ.get('BLENDER_MCP_SERVER', r'D:/dev-cache/blender-mcp-server/.venv/Scripts/blender-mcp-server.exe')
+SERVER = os.environ.get('BLENDER_MCP_SERVER', r'D:\dev-cache\blender-mcp-server\.venv\Scripts\blender-mcp-server.exe')
 VIEWS = ['face', 'trois-quarts-avant', 'profil-gauche', 'dos', 'profil-droit', 'trois-quarts-arriere']
 
 

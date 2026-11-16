@@ -9,12 +9,14 @@ import sharp from 'sharp';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const BASE = process.env.BASE_URL ?? 'http://localhost:4173';
-const SHOTS = process.env.SHOTS_DIR ?? 'e2e-shots/poses';
-const CHROME = process.env.CHROME_PATH ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:4173';
+const SHOTS = process.env.SHOTS_DIR ?? 'D:\\dev-cache\\tmp\\lf-shots\\poses';
+const CHROME_PROFILE = process.env.CHROME_PROFILE ?? 'D:\\dev-cache\\tmp\\chrome-runs';
+const CHROME = process.env.CHROME_PATH ?? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const PAGE = process.env.POSE_PAGE ?? '/propager/heart-of-ice';
 const ENTERED_KEY = 'lf-entered';
 fs.mkdirSync(SHOTS, { recursive: true });
+fs.mkdirSync(CHROME_PROFILE, { recursive: true });
 
 const results = [];
 const check = (name, ok, extra = '') => {
@@ -65,7 +67,7 @@ const skipIntro = (page) => page.evaluateOnNewDocument((k) => sessionStorage.set
 const browser = await puppeteer.launch({
   executablePath: CHROME,
   headless: true,
-  ...(process.env.CHROME_PROFILE ? { userDataDir: fs.mkdtempSync(path.join(process.env.CHROME_PROFILE, 'run-')) } : {}),
+  userDataDir: fs.mkdtempSync(path.join(CHROME_PROFILE, 'run-')),
   args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--no-sandbox'],
 });
 

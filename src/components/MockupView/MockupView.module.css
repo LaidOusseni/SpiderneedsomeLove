@@ -1,116 +1,115 @@
+/* Vue 2D : conserve le format natif de chaque mockup dans son conteneur */
 .view {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column-reverse; /* Devant / Dos au-dessus de l'image */
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-md);
-}
-
-/* Vêtement détouré, posé directement sur le fond sombre de la scène */
-.card {
+  container: mockups / size;
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: calc(100% - 60px);
-  padding: 0;
-  background: none;
-  border: 0;
-  cursor: pointer;
-}
-
-.card:focus-visible { outline: 2px solid var(--color-red-glow); outline-offset: 6px; border-radius: var(--radius-lg); }
-
-/* Couvertures comics (non détourées) : cadre conservé */
-.framed .img {
-  border-radius: var(--radius-lg);
-  border: 1.5px solid rgba(255, 255, 255, 0.5);
-  box-shadow: var(--shadow-deep), 0 0 50px rgba(201, 0, 37, 0.25);
-}
-
-.float {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100%;
   height: 100%;
-  animation: float 6.5s ease-in-out infinite;
-  will-change: transform;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
 }
 
-.img {
-  max-width: min(100%, 640px);
-  max-height: 100%;
-  width: auto;
-  height: auto;        /* proportions d'origine, jamais étirées */
-  object-fit: contain;
-  /* relief discret sur le fond sombre : ombre portée + contre-jour rouge (le vêtement reste opaque) */
-  filter: drop-shadow(0 22px 26px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 22px rgba(201, 0, 37, 0.28));
-  animation: swap 0.35s var(--ease-out) both;
+.track {
+  --gap: clamp(12px, 3cqw, 32px);
+  --label: 30px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap);
+}
+
+.slide {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: min(calc((100cqw - var(--gap)) / 2), calc((100cqh - var(--label) - 36px) * var(--aspect)));
+}
+.slideSingle {
+  width: min(calc(100cqw - var(--gap)), calc((100cqh - var(--label) - 36px) * var(--aspect)));
+}
+
+.faceBtn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border-radius: 2px;
   transition: transform 0.35s var(--ease-out);
 }
+.faceBtn:hover { transform: translateY(-4px) rotate(-0.6deg); }
+.slide:nth-child(2) .faceBtn:hover { transform: translateY(-4px) rotate(0.6deg); }
 
-.card:hover .img { transform: scale(1.015); }
+.face {
+  display: block;
+  width: 100%;
+  aspect-ratio: var(--aspect);
+  animation: faceIn 0.6s var(--ease-out) both;
+  animation-delay: var(--d, 0s);
+}
+@keyframes faceIn { from { opacity: 0; transform: translateY(14px) scale(0.98); } }
 
-.shadow {
-  position: absolute;
-  left: 50%;
-  bottom: 2%;
-  width: 46%;
-  height: 22px;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.7), transparent);
-  animation: shadow 6.5s ease-in-out infinite;
-  pointer-events: none;
+.original {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: transparent;
+  border: 1px solid rgba(20, 10, 11, 0.28);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
 }
 
-/* Lent et régulier : ±6 px, inclinaison < 1° */
-@keyframes float {
-  0%, 100% { transform: translateY(0) rotate(-0.6deg); }
-  50% { transform: translateY(-12px) rotate(0.6deg); }
+.caption {
+  height: var(--label);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
-@keyframes shadow {
-  0%, 100% { opacity: 0.85; transform: translateX(-50%) scaleX(1); }
-  50% { opacity: 0.55; transform: translateX(-50%) scaleX(0.88); }
+/* Points du carrousel : seulement quand les mockups défilent */
+.dots { display: none; justify-content: center; gap: 8px; padding-top: 6px; }
+.dot {
+  min-height: 32px;
+  padding: 4px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.dotActive { background: var(--color-red); border-color: var(--color-red); color: #fff; }
+
+/* Place insuffisante : carrousel à faire glisser (un mockup à la fois) */
+@container mockups (max-width: 520px) {
+  .track {
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-inline: 9cqw;
+    scroll-padding-inline: 9cqw;
+  }
+  .track::-webkit-scrollbar { display: none; }
+  .slide {
+    width: min(82cqw, calc((100cqh - var(--label) - 52px) * var(--aspect)));
+    scroll-snap-align: center;
+  }
+  .slideSingle {
+    width: min(90cqw, calc((100cqh - var(--label) - 52px) * var(--aspect)));
+  }
+  .dots { display: flex; }
 }
 
-@keyframes swap {
-  from { opacity: 0; transform: scale(0.97); }
-}
+.zoom { width: min(86vw, calc(80vh * var(--aspect, 0.75))); margin: 0 auto; }
 
 @media (prefers-reduced-motion: reduce) {
-  .float, .shadow, .img { animation: none; }
-  .card:hover .img { transform: none; }
+  .face { animation: none; }
+  .faceBtn, .faceBtn:hover { transition: none; transform: none; }
 }
-
-.sides {
-  display: inline-flex;
-  padding: 3px;
-  border-radius: var(--radius-pill);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(0, 0, 0, 0.55);
-}
-
-.side {
-  min-width: 76px;
-  min-height: 34px;
-  padding: 6px 14px;
-  border-radius: var(--radius-pill);
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  transition: background var(--transition-fast), color var(--transition-fast);
-}
-
-.side:hover { color: var(--color-white); }
-
-.sideActive {
-  background: var(--color-white);
-  color: #120406;
-  font-weight: 600;
-}
-.sideActive:hover { color: #120406; }

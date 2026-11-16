@@ -92,7 +92,7 @@ Le serveur est enregistré dans Claude Code pour ce projet sous le nom `blender`
 2. Lancer :
 
    ```bash
-   D:/dev-cache/blender-mcp-server/.venv/Scripts/python.exe scripts/figurine/mcp_session.py <texture.glb> D:/dev-cache/figurine-final
+   D:\dev-cache\blender-mcp-server\.venv\Scripts\python.exe scripts/figurine/mcp_session.py <texture.glb> D:\dev-cache\figurine-final
    ```
 
    `mcp_session.py` appelle les outils MCP : `blender_python_exec` pour les étapes de `blender_finish.py`, `blender_render_still` pour les 6 rendus de contrôle, plus le contrôle de la scène, la sauvegarde du `.blend`, l'export et la vérification par réimport.

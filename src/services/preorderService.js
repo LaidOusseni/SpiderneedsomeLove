@@ -1,123 +1,76 @@
 import { supabase } from './supabase';
-
-const STORAGE_KEY = 'lovefaith-preorders-local';
+import { normalizeInstagram, validateInstagram } from '../utils/instagram';
 
 const normalize = (value) => (typeof value === 'string' ? value.trim() : '');
 
-function readLocalPreorders() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
+const ERROR_MESSAGES = {
+  closed: 'Les précommandes de ce drop sont fermées.',
+  consent_required: 'Ton accord est nécessaire pour enregistrer ta demande.',
+  invalid_email: 'Merci de renseigner une adresse e-mail valide.',
+  invalid_input: 'Vérifie ton prénom, ta taille et les quantités indiquées.',
+  rate_limited: 'Trop de tentatives en peu de temps. Merci de réessayer plus tard.',
+  robot_detected: 'La demande n’a pas pu être enregistrée.',
+};
 
-function writeLocalPreorders(items) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  } catch {
-    // stock local réduit à cause de la navigation privée ou des restrictions du navigateur
-  }
-}
+export async function fetchPreorderCount(slug = 'batman-drop-01') {
+  if (!supabase) return { count: null, source: 'unavailable' };
 
-export async function fetchPreorderCount() {
-  if (!supabase) {
-    return { count: readLocalPreorders().length, source: 'local' };
-  }
+  const { data, error } = await supabase.rpc('count_preorder_registrations', { p_drop_slug: slug });
 
-  try {
-    const { data, error } = await supabase.rpc('count_preorders');
-    if (error) {
-      const text = error?.message ?? '';
-      if (/does not exist|function .*count_preorders/i.test(text)) {
-        return { count: readLocalPreorders().length, source: 'local' };
-      }
-      throw error;
-    }
-
-    return { count: Number(data) || 0, source: 'supabase' };
-  } catch {
-    return { count: readLocalPreorders().length, source: 'local' };
-  }
+  if (error) throw error;
+  return { count: Number(data) || 0, source: 'supabase' };
 }
 
 export async function submitPreorder(payload) {
   const firstName = normalize(payload.firstName);
   const lastName = normalize(payload.lastName);
-  const email = normalize(payload.email);
-  const size = normalize(payload.size);
-  const quantity = Number(payload.quantity) || 1;
-  const deliveryInfo = normalize(payload.deliveryInfo);
+  const instagram = normalize(payload.instagram);
+  const email = normalize(payload.email).toLowerCase();
+  const sizes = Array.isArray(payload.sizes) ? payload.sizes : [];
 
-  const record = {
-    creation_slug: payload.creationSlug || 'batman-drop-01',
-    first_name: firstName,
-    last_name: lastName,
-    email,
-    product: 'long',
-    size,
-    quantity,
-    delivery_info: deliveryInfo,
-  };
-
-  if (!firstName || !lastName || !email || !size) {
-    return { ok: false, code: 'invalid_input', message: 'Merci de remplir les champs obligatoires.' };
+  if (!firstName || firstName.length > 60 || !lastName || lastName.length > 60 || !email || !sizes.length) {
+    return { ok: false, code: 'invalid_input', message: ERROR_MESSAGES.invalid_input };
   }
-
+  if (instagram && !validateInstagram(instagram).ok) {
+    return { ok: false, code: 'invalid_input', message: 'Indique un nom d’utilisateur Instagram valide.' };
+  }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { ok: false, code: 'invalid_email', message: 'Merci de renseigner une adresse e-mail valide.' };
+    return { ok: false, code: 'invalid_email', message: ERROR_MESSAGES.invalid_email };
   }
-
+  if (!payload.consent) {
+    return { ok: false, code: 'consent_required', message: ERROR_MESSAGES.consent_required };
+  }
   if (!supabase) {
-    const list = readLocalPreorders();
-    list.push({ ...record, source: 'local' });
-    writeLocalPreorders(list);
-    return {
-      ok: true,
-      code: 'local_saved',
-      message: 'Précommande enregistrée localement. Elle sera synchronisée dès que la table Supabase sera disponible.',
-      count: list.length,
-    };
+    return { ok: false, code: 'unavailable', message: 'Le service est momentanément indisponible. Merci de réessayer plus tard.' };
   }
 
   try {
-    const { error } = await supabase.from('preorders').insert([record]);
-    if (!error) {
-      const countResult = await fetchPreorderCount();
+    const { data, error } = await supabase.rpc('register_preorder_with_identity', {
+      p_drop_slug: payload.creationSlug || 'batman-drop-01',
+      p_first_name: firstName,
+      p_last_name: lastName,
+      p_email: email,
+      p_instagram: normalizeInstagram(instagram) || null,
+      p_sizes: sizes,
+      p_consent: true,
+      p_website: normalize(payload.website),
+    });
+
+    if (error) {
+      return { ok: false, code: 'server', message: 'Impossible d’enregistrer ton intérêt pour le moment. Merci de réessayer plus tard.' };
+    }
+
+    if (!data?.ok) {
+      const code = data?.code || 'server';
       return {
-        ok: true,
-        code: 'saved',
-        message: 'Précommande enregistrée. Aucune commande n\'a été payée pour le moment.',
-        count: countResult.count,
+        ok: false,
+        code,
+        message: ERROR_MESSAGES[code] || 'Impossible d’enregistrer ton intérêt pour le moment. Merci de réessayer plus tard.',
       };
     }
 
-    const text = error?.message ?? '';
-    if (/does not exist|relation .*preorders/i.test(text)) {
-      const list = readLocalPreorders();
-      list.push({ ...record, source: 'local' });
-      writeLocalPreorders(list);
-      return {
-        ok: true,
-        code: 'local_saved',
-        message: 'Précommande enregistrée localement. La table Supabase est absente pour le moment.',
-        count: list.length,
-      };
-    }
-
-    return { ok: false, code: 'server', message: 'Une erreur est survenue lors de l\'enregistrement de la précommande.' };
-  } catch (error) {
-    const list = readLocalPreorders();
-    list.push({ ...record, source: 'local' });
-    writeLocalPreorders(list);
-    return {
-      ok: true,
-      code: 'local_saved',
-      message: 'Précommande enregistrée localement. Le service de paiement n\'est pas encore activé.',
-      count: list.length,
-    };
+    return { ok: true, code: data.code, count: Number(data.people) || 0 };
+  } catch {
+    return { ok: false, code: 'network', message: 'Connexion impossible. Vérifie ton réseau puis réessaie.' };
   }
 }

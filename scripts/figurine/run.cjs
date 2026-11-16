@@ -11,7 +11,6 @@
  * Prérequis : Google Chrome (CHROME_PATH), Blender 4.2+ (BLENDER_PATH), dépendances du projet.
  */
 const fs = require('fs');
-const os = require('os');
 const path = require('path');
 const puppeteer = require('puppeteer-core');
 
@@ -20,11 +19,12 @@ const OUT_GLB = path.join(ROOT, 'Mockups', 'LoveFaith_Playmobil_Final.glb'); // 
 const OUT_SITE = path.join(ROOT, 'public', 'models', 'lovefaith-figure.glb'); // modèle utilisé par la vue 3D du site
 const OUT_TEX = path.join(ROOT, 'Mockups', 'LoveFaith_Playmobil_Textures');
 const OUT_PREVIEW = path.join(ROOT, 'Mockups', 'LoveFaith_Playmobil_Apercus');
-const CHROME = process.env.CHROME_PATH ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe';
-const TMP = process.env.LF_TMP ?? os.tmpdir();
-const BLENDER = process.env.BLENDER_PATH ?? (fs.existsSync('D:/blender.exe') ? 'D:/blender.exe' : 'blender');
+const CHROME = process.env.CHROME_PATH ?? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+const TMP = process.env.LF_TMP ?? 'D:\\dev-cache\\tmp';
+const BLENDER = process.env.BLENDER_PATH ?? (fs.existsSync('D:\\blender.exe') ? 'D:\\blender.exe' : 'blender');
 const STAGE1 = path.join(TMP, 'lovefaith-1-texture.glb'); // sortie de build.js
 const STAGE2 = path.join(TMP, 'lovefaith-2-blender.glb'); // sortie de Blender
+fs.mkdirSync(TMP, { recursive: true });
 
 // Fichiers servis à la page (chemin d'URL → fichier local)
 const ROUTES = {

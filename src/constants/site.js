@@ -4,6 +4,7 @@ export const BRAND_ASSETS = {
   logo3d: '/brand/logo-3d.glb',
   logo2d: '/brand/logo-2d.png',
   titleIntro: '/brand/title-intro.png',
+  kissLogo: '/brand/lovefaith-kiss.png',
   introVideo: '/brand/intro-bg.mp4',
   introPoster: '/brand/intro-poster.jpg',
   beanieKiss: '/brand/beanie-kiss.png', // bisou rose du bonnet de la figurine (généré par npm run assets)
@@ -21,5 +22,12 @@ export const VOTE_TEXTS = {
   success: "Merci de faire partie de l'aventure Love&Faith. Ton vote a bien été pris en compte.",
 };
 
-export const APP_TEASER =
-  "Votre adresse email servira à envoyer le lien pour être les premiers utilisateurs de l'application Love&Faith.";
+export const NEWSLETTER_TEXTS = {
+  title: "Sois le premier à recevoir nos lettres d'amour.",
+  text: [
+    "Inscris-toi à notre newsletter pour recevoir en avant-première les actualités autour de Love&Faith : nouvelles collections, prochains drops, projets, événements et tout ce qui fait vivre notre univers.",
+    "Parce que l'amour mérite d'être partagé, sois parmi les premiers à suivre son chemin.",
+  ],
+  consent:
+    "J'accepte de recevoir la newsletter Love&Faith par e-mail. Je peux me désinscrire à tout moment grâce au lien présent dans chaque lettre.",
+};

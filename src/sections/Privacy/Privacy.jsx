@@ -51,8 +51,23 @@ const Privacy = () => (
     <section>
       <h2>La newsletter</h2>
       <p>
-        Si tu t'inscris, nous enregistrons ton adresse e-mail pour t'envoyer le lien d'accès à l'application
-        Love&amp;Faith et les nouvelles du projet. Durée de conservation : {PRIVACY.newsletterRetention}.
+        Si tu t'inscris, nous enregistrons ton adresse e-mail, la date de ton consentement et ton statut d'inscription
+        pour t'envoyer nos « lettres d'amour » : nouvelles collections, prochains drops, projets et événements Love&amp;Faith.
+        Ton adresse n'est jamais affichée sur le site ni transmise à des tiers. Chaque lettre contient un lien de
+        désinscription. Durée de conservation : {PRIVACY.newsletterRetention}.
+      </p>
+    </section>
+
+    <section>
+      <h2>La précommande</h2>
+      <p>
+        Si tu manifestes ton intérêt pour un drop, nous enregistrons ton prénom, ton nom, ton adresse e-mail, le nom
+        d’utilisateur Instagram si tu le renseignes, les tailles et quantités souhaitées, la date de ton consentement et
+        une empreinte salée de ton adresse IP (ou de ton e-mail
+        si l'adresse IP n'est pas transmise) pour limiter les envois abusifs. Le champ anti-robot n'est pas conservé.
+        Ces informations servent uniquement à estimer l'intérêt
+        et les quantités envisagées, puis à te tenir informé·e si tu y as consenti. Cette démarche n'est pas une commande
+        et aucun paiement n'est demandé. Durée de conservation : {PRIVACY.preorderRetention}.
       </p>
     </section>
 
@@ -69,7 +84,7 @@ const Privacy = () => (
       <h2>Stockage dans ton navigateur</h2>
       <p>
         Le site ne dépose aucun cookie publicitaire ni de mesure d'audience. Il mémorise seulement, dans ton navigateur,
-        que tu as déjà vu l'introduction (le temps de ta visite) et ton mode d'affichage préféré (vue 3D ou 2D).
+        que tu as déjà vu l'introduction (le temps de ta visite).
       </p>
     </section>
 

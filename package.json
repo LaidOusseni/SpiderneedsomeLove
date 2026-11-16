@@ -14,7 +14,9 @@
     "figurine:rig": "node scripts/figurine/compress-rig.mjs",
     "check:poses": "node scripts/e2e-poses.mjs",
     "check:vote": "node scripts/e2e-vote.mjs",
-    "mockups:cutout": "node scripts/cutout-mockups.mjs"
+    "mockups:cutout": "node scripts/cutout-mockups.mjs",
+    "check:refonte": "node scripts/e2e-refonte.mjs",
+    "figurine:optimize": "node scripts/figurine/optimize-glb.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",
@@ -28,6 +30,7 @@
   "devDependencies": {
     "@electric-sql/pglite": "^0.3.16",
     "@vitejs/plugin-react": "^4.3.1",
+    "gltfpack": "^0.24.0",
     "meshoptimizer": "^1.1.1",
     "puppeteer-core": "^23.11.1",
     "sharp": "^0.33.5",

@@ -1,19 +1,23 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
-import { BrowserRouter, Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import NavBar from './components/NavBar/NavBar';
 import Intro from './sections/Intro/Intro';
 import Propager from './sections/Propager/Propager';
 import About from './sections/About/About';
 import Journey from './sections/Journey/Journey';
 import Privacy from './sections/Privacy/Privacy';
+import SiteFooter from './components/SiteFooter/SiteFooter';
 import { VoteResultsProvider } from './context/VoteResultsContext';
 import AsciiLogoBackground from './components/AsciiLogoBackground/AsciiLogoBackground';
 import { LEGACY_REDIRECTS } from './constants/navigation';
 import styles from './App.module.css';
 
 const CreationDetail = lazy(() => import('./sections/CreationDetail/CreationDetail'));
+const LegalNotice = lazy(() => import('./sections/LegalNotice/LegalNotice'));
+const Unsubscribe = lazy(() => import('./sections/Unsubscribe/Unsubscribe'));
 
 const ENTERED_KEY = 'lf-entered';
+const DIRECT_PATHS = ['/confidentialite', '/mentions-legales', '/newsletter/desinscription'];
 
 function readEntered() {
   try {
@@ -23,10 +27,42 @@ function readEntered() {
   }
 }
 
-/** Remonte en haut de page à chaque changement de route (hors changement de création sélectionnée). */
+/**
+ * Remonte en haut de page à chaque changement de route (hors changement de création sélectionnée).
+ * Avec une ancre (#newsletter, #valeurs…), défile jusqu'à la section dès qu'elle est rendue (pages chargées à la demande).
+ */
 function ScrollToTop() {
-  const { pathname } = useLocation();
-  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  const { pathname, hash } = useLocation();
+  useEffect(() => {
+    if (!hash) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      return undefined;
+    }
+
+    let cancelled = false;
+    let tries = 0;
+    let timer;
+
+    const seek = () => {
+      if (cancelled) return;
+      const id = decodeURIComponent(hash.slice(1));
+      const el = document.getElementById(id);
+      if (!el) {
+        if (tries++ < 30) timer = setTimeout(seek, 80);
+        return;
+      }
+
+      const stickyOffset = document.querySelector('header')?.offsetHeight ?? 0;
+      const targetTop = el.getBoundingClientRect().top + window.scrollY - stickyOffset - 16;
+      window.scrollTo({ top: Math.max(0, targetTop), left: 0, behavior: 'smooth' });
+    };
+
+    seek();
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [pathname, hash]);
   return null;
 }
 
@@ -43,8 +79,8 @@ function Site() {
     setEntered(true);
   }, [location.pathname, navigate]);
 
-  // La politique de confidentialité reste lisible directement (lien du formulaire ouvert dans un nouvel onglet)
-  if (!entered && location.pathname !== '/confidentialite') return <Intro onEnter={handleEnter} />;
+  // Pages lisibles directement, sans l'intro : confidentialité, mentions légales, désinscription (liens externes / e-mails)
+  if (!entered && !DIRECT_PATHS.includes(location.pathname)) return <Intro onEnter={handleEnter} />;
 
   return (
     <div className={styles.site}>
@@ -61,6 +97,8 @@ function Site() {
             <Route path="/a-propos" element={<About />} />
             <Route path="/chemin" element={<Journey />} />
             <Route path="/confidentialite" element={<Privacy />} />
+            <Route path="/mentions-legales" element={<LegalNotice />} />
+            <Route path="/newsletter/desinscription" element={<Unsubscribe />} />
             {LEGACY_REDIRECTS.map((r) => (
               <Route key={r.from} path={r.from} element={<Navigate to={r.to} replace />} />
             ))}
@@ -68,10 +106,7 @@ function Site() {
           </Routes>
         </Suspense>
       </main>
-      <footer className={styles.footer}>
-        <span>© Love&amp;Faith</span>
-        <Link to="/confidentialite">Politique de confidentialité</Link>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

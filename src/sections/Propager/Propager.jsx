@@ -4,7 +4,7 @@ import styles from './Propager.module.css';
 import { CANDIDATES, CREATIONS, CURRENT_DROP, getCreation } from '../../constants/creations';
 import { useVoteResults } from '../../context/VoteResultsContext';
 import { canVote, resolveCreationStatus } from '../../utils/creationStatus';
-import { useViewMode } from '../../utils/viewMode';
+import { useIdlePrefetch3D, useViewMode } from '../../utils/viewMode';
 import { computeStandings, formatShare, formatVotes } from '../../utils/voteStats';
 import StatusBadge from '../../components/StatusBadge/StatusBadge';
 import ViewModeToggle from '../../components/ViewModeToggle/ViewModeToggle';
@@ -58,6 +58,7 @@ const Propager = () => {
   const viewerRef = useRef(null);
   const [can3D] = useState(hasWebGL);
   const [viewMode, changeViewMode] = useViewMode();
+  useIdlePrefetch3D(Boolean(selected) && viewMode === '2d');
 
   const select = useCallback((slug) => setParams(slug ? { c: slug } : {}, { replace: true }), [setParams]);
 
@@ -120,15 +121,15 @@ const Propager = () => {
 
         {selected && (
           <>
-            {viewMode === '3d' ? (
-              <div className={styles.viewer} key="viewer-3d">
-                <Suspense fallback={<div className={styles.viewerLoading}>Chargement de la figurine…</div>}>
-                  <GarmentViewer ref={viewerRef} creation={selected} />
-                </Suspense>
-              </div>
-            ) : (
+            {viewMode === '2d' ? (
               <div className={`${styles.viewer} ${styles.viewer2d}`} key="viewer-2d">
                 <MockupView creation={selected} />
+              </div>
+            ) : (
+              <div className={styles.viewer} key="viewer-3d">
+                <Suspense fallback={<div className={styles.viewerLoading} role="status">Chargement de la figurine 3D…</div>}>
+                  <GarmentViewer ref={viewerRef} creation={selected} />
+                </Suspense>
               </div>
             )}
 
@@ -189,7 +190,7 @@ const Propager = () => {
       </div>
 
       {/* ── Panneau de sélection ── */}
-      <aside className={styles.panel} aria-label="Créations">
+      <aside id="creations" className={styles.panel} aria-label="Créations">
         <div className={styles.panelGroup}>
           {CURRENT_DROP && (
             <div className={styles.currentDropCard}>

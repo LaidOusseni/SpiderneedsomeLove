@@ -30,6 +30,8 @@ const RAW_CREATIONS = [
     isPreorderAvailable: true,
     preorderTag: 'DROP #01 — PRÉCOMMANDES OUVERTES',
     assetSlug: 'love-in-darkness',
+    mockupFiles: { front: 'gallery-front.webp', back: 'gallery-back.webp' },
+    mockupAspectRatio: 0.5625,
     storySlug: 'love-in-darkness',
     tagline: 'Le premier chapitre Love&Faith.',
     garment: { cut: 'longsleeve' },
@@ -39,13 +41,8 @@ const RAW_CREATIONS = [
     name: 'Heart of Ice',
     status: 'candidate',
     tagline: null, // aucun texte imprimé
-    garment: { cut: 'longsleeve' },
-  },
-  {
-    slug: 'love-in-darkness',
-    name: 'Love in Darkness',
-    status: 'candidate',
-    tagline: 'Even in the darkness, love.',
+    mockupFiles: { front: 'comic-front.webp', back: 'comic-back.webp' },
+    mockupAspectRatio: 0.5625,
     garment: { cut: 'longsleeve' },
   },
   {
@@ -53,6 +50,8 @@ const RAW_CREATIONS = [
     name: 'World Love',
     status: 'candidate',
     tagline: 'Love rules the world',
+    mockupFiles: { front: 'gallery-front.webp', back: 'gallery-back.webp' },
+    mockupAspectRatio: 0.5625,
     garment: { cut: 'longsleeve' },
   },
   {
@@ -61,6 +60,8 @@ const RAW_CREATIONS = [
     subtitle: 'Casino',
     status: 'candidate',
     tagline: 'No chance, only Love&Faith',
+    mockupFiles: { front: 'gallery-front.webp', back: 'gallery-back.webp' },
+    mockupAspectRatio: 0.5625,
     garment: { cut: 'longsleeve' },
   },
   {
@@ -69,6 +70,8 @@ const RAW_CREATIONS = [
     subtitle: 'Les Vrais Amoureux',
     status: 'candidate',
     tagline: 'For real lovers',
+    mockupFiles: { front: 'gallery-front.webp', back: 'gallery-back.webp' },
+    mockupAspectRatio: 0.5625,
     garment: { cut: 'longsleeve' },
   },
   {
@@ -77,6 +80,8 @@ const RAW_CREATIONS = [
     subtitle: 'Pour les Vrais Amoureux',
     status: 'candidate',
     tagline: 'Pour les vrais amoureux',
+    mockupFiles: { front: 'gallery-front.webp', back: 'gallery-back.webp' },
+    mockupAspectRatio: 0.5625,
     garment: { cut: 'longsleeve' },
   },
   {
@@ -85,7 +90,7 @@ const RAW_CREATIONS = [
     subtitle: 'Tome I',
     status: 'historic',
     tagline: 'Tome I — déjà sorti',
-    mockupsAreCovers: true, // galerie = couvertures comics de la V1
+    mockupAspectRatio: 0.5625,
     garment: {
       cut: 'tee',
       color: '#f2f2f2',
@@ -116,8 +121,9 @@ export const CREATIONS = RAW_CREATIONS.map((c, index) => ({
   index,
   icon: asset(c.assetSlug ?? c.slug, 'icon.webp'),
   mockups: {
-    front: asset(c.assetSlug ?? c.slug, 'front.webp'),
-    back: asset(c.assetSlug ?? c.slug, 'back.webp'),
+    front: asset(c.assetSlug ?? c.slug, c.mockupFiles?.front ?? 'front.webp'),
+    back: asset(c.assetSlug ?? c.slug, c.mockupFiles?.back ?? 'back.webp'),
+    poster: c.mockupFiles?.poster ? asset(c.assetSlug ?? c.slug, c.mockupFiles.poster) : null,
   },
   garment: buildGarment(c.assetSlug ?? c.slug, c.garment ?? {}),
   story: CREATION_STORIES[c.storySlug ?? c.slug]?.story ?? [],

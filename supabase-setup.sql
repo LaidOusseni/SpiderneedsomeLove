@@ -3,6 +3,8 @@
 -- ⚠️ Ne plus exécuter tel quel : la politique « preorders_select_public »
 --    exposait les données personnelles et est supprimée par
 --    supabase/migrations/20261029120000_community_vote.sql (voir docs/SUPABASE.md).
+-- Ce fichier seul ne crée pas le backend actuel de vote, de classement ni d'intentions de précommande.
+-- Pour le projet actuel, appliquer les migrations listées dans docs/SUPABASE.md dans l'ordre.
 -- ═══════════════════════════════════════════════════════════════
 
 -- ─────────────────────────────────────────

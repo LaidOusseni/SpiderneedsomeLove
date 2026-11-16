@@ -11,10 +11,12 @@ import puppeteer from 'puppeteer-core';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const BASE = process.env.BASE_URL ?? 'http://localhost:4173';
-const SHOTS = process.env.SHOTS_DIR ?? 'e2e-shots/vote';
-const CHROME = process.env.CHROME_PATH ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:4173';
+const SHOTS = process.env.SHOTS_DIR ?? 'D:\\dev-cache\\tmp\\lf-shots\\vote';
+const CHROME_PROFILE = process.env.CHROME_PROFILE ?? 'D:\\dev-cache\\tmp\\chrome-runs';
+const CHROME = process.env.CHROME_PATH ?? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 fs.mkdirSync(SHOTS, { recursive: true });
+fs.mkdirSync(CHROME_PROFILE, { recursive: true });
 
 const results = [];
 const check = (name, ok, extra = '') => {
@@ -76,7 +78,7 @@ async function mockSupabase(page) {
 const browser = await puppeteer.launch({
   executablePath: CHROME,
   headless: true,
-  ...(process.env.CHROME_PROFILE ? { userDataDir: fs.mkdtempSync(path.join(process.env.CHROME_PROFILE, 'run-')) } : {}),
+  userDataDir: fs.mkdtempSync(path.join(CHROME_PROFILE, 'run-')),
   args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--no-sandbox'],
 });
 

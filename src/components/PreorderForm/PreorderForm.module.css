@@ -2,27 +2,30 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
-  min-width: min(100%, 620px);
+  width: min(100%, 620px);
 }
 
 .header {
   display: flex;
   align-items: center;
   gap: 16px;
+  padding-right: 28px;
 }
 
 .icon,
 .resultIcon {
-  width: 72px;
-  height: 72px;
-  border-radius: 14px;
+  width: 64px;
+  height: 64px;
+  flex: 0 0 auto;
+  border-radius: 12px;
   object-fit: cover;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .kicker {
+  margin-bottom: 5px;
   font-size: 0.66rem;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--color-red-glow);
 }
@@ -31,25 +34,21 @@
   font-family: var(--font-title);
   font-style: italic;
   font-weight: 900;
-  font-size: clamp(1.7rem, 3vw, 2.3rem);
+  font-size: clamp(1.65rem, 3vw, 2.2rem);
   line-height: 1.1;
 }
 
 .subtitle {
+  margin-top: 5px;
   font-size: 0.9rem;
   color: var(--text-muted);
 }
 
-.purpose,
-.small {
+.small,
+.resultText {
   color: rgba(255, 255, 255, 0.78);
   line-height: 1.6;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px 16px;
+  font-size: 0.88rem;
 }
 
 .field {
@@ -58,38 +57,97 @@
   gap: 8px;
 }
 
-.field label {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.72);
+.field label,
+.sizes legend {
+  font-size: 0.86rem;
+  font-weight: 650;
+  color: rgba(255, 255, 255, 0.86);
 }
 
 .field input,
-.field select,
-.field textarea {
+.sizeRow select {
   width: 100%;
-  min-height: 44px;
+  min-height: 48px;
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(0, 0, 0, 0.4);
+  background: #100709;
   color: var(--color-white);
 }
 
-.field textarea {
-  resize: vertical;
-  min-height: 88px;
+.field input:focus,
+.sizeRow select:focus,
+.consentField input:focus {
+  outline: 2px solid rgba(255, 31, 61, 0.8);
+  outline-offset: 2px;
 }
 
-.field input:focus,
-.field select:focus,
-.field textarea:focus {
-  outline: 2px solid rgba(255, 31, 61, 0.8);
-  outline-offset: 1px;
+.sizes {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.sizes legend { margin-bottom: 10px; }
+
+.sizeList {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.sizeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 7px 8px 7px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.sizeRow select {
+  width: 72px;
+  min-height: 48px;
+  padding: 8px;
+  text-align: center;
+}
+
+.consentField {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+}
+
+.consentField input {
+  width: 22px;
+  height: 22px;
+  margin: 1px 0 0;
+  accent-color: #e0002d;
+}
+
+.consentField label {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.trap {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
 }
 
 .error {
-  font-size: 0.74rem;
   color: #ff9ca8;
+  font-size: 0.78rem;
 }
 
 .formError {
@@ -106,6 +164,7 @@
   align-items: center;
   min-height: 52px;
   width: 100%;
+  padding: 10px 18px;
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 999px;
   background: linear-gradient(180deg, #d4002a, #7a000e);
@@ -126,12 +185,7 @@
   flex-direction: column;
   gap: 16px;
   align-items: flex-start;
-  min-width: min(100%, 420px);
-}
-
-.resultText {
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.6;
+  width: min(100%, 480px);
 }
 
 .resultActions {
@@ -139,6 +193,7 @@
   flex-wrap: wrap;
   gap: 12px;
   align-items: center;
+  width: 100%;
 }
 
 .link {
@@ -147,13 +202,11 @@
   text-underline-offset: 4px;
 }
 
-@media (max-width: 640px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
-
+@media (max-width: 560px) {
   .header {
     align-items: flex-start;
     flex-direction: column;
   }
+
+  .sizeList { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

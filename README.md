@@ -32,9 +32,10 @@ désignation du gagnant, vérifications de sécurité.
 ### Drop actuel et prochaines créations
 
 - Le premier drop Love&Faith est le Batman (`batman-drop-01`) : il est mis en avant comme produit disponible à la précommande.
-- `Love in Darkness` et les autres candidates restent en compétition pour le prochain drop.
+- Batman / « Love in Darkness » est uniquement le drop actuel ; cinq autres créations sont en compétition pour le prochain drop.
 - Masks & Hearts est historique et le Batman est exclu du classement communautaire.
-- Les formulaires de précommande sont gérés côté frontend avec sauvegarde locale en secours si la table Supabase `preorders` n'est pas encore créée.
+- Les mockups comics de chaque candidate montrent le devant et le dos ; la fiche du drop Batman recueille prénom, nom, e-mail, tailles et identifiant Instagram facultatif.
+- Les votes et intentions de précommande sont enregistrés via des fonctions Supabase, sans lecture publique des données personnelles.
 
 ## Déploiement Vercel
 

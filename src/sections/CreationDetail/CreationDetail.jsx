@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import styles from './CreationDetail.module.css';
-import { CANDIDATES, CREATIONS, CURRENT_DROP, getCreation } from '../../constants/creations';
+import { CANDIDATES, CREATIONS, getCreation } from '../../constants/creations';
 import { useVoteResults } from '../../context/VoteResultsContext';
 import { canVote, resolveCreationStatus } from '../../utils/creationStatus';
 import { computeStandings } from '../../utils/voteStats';
@@ -14,7 +14,7 @@ import PreorderForm from '../../components/PreorderForm/PreorderForm';
 import MockupView from '../../components/MockupView/MockupView';
 import ViewModeToggle from '../../components/ViewModeToggle/ViewModeToggle';
 import { hasWebGL } from '../../three/webgl';
-import { useViewMode } from '../../utils/viewMode';
+import { useIdlePrefetch3D, useViewMode } from '../../utils/viewMode';
 import { fetchPreorderCount } from '../../services/preorderService';
 
 const GarmentViewer = lazy(() => import('../../components/GarmentViewer/GarmentViewer'));
@@ -28,15 +28,21 @@ function PreorderPanel({ creation, count, onOpen }) {
         Ce modèle est le premier produit officiel Love&Faith et le seul actuellement disponible à la précommande.
       </p>
       <div className={styles.preorderSummary}>
-        <strong>{count}</strong>
-        <span>précommande{count > 1 ? 's' : ''} enregistrée{count > 1 ? 's' : ''}</span>
+        {Number.isInteger(count) ? (
+          <>
+            <strong>{count}</strong>
+            <span>personne{count > 1 ? 's' : ''} intéressée{count > 1 ? 's' : ''}</span>
+          </>
+        ) : (
+          <span>{count === null ? 'Chargement du nombre de personnes intéressées…' : 'Nombre de personnes intéressées indisponible.'}</span>
+        )}
       </div>
       <button type="button" className={styles.voteBtn} onClick={onOpen}>
-        <span className={styles.voteBtnLabel}>Précommander maintenant</span>
-        <span className={styles.voteBtnHint}>Aucun paiement immédiat</span>
+        <span className={styles.voteBtnLabel}>Précommander</span>
+        <span className={styles.voteBtnHint}>Découvrir les modalités — sans paiement</span>
       </button>
       <p className={styles.small}>
-        Cette création n'est pas un vote : c'est un produit disponible dès maintenant.
+        Cette création n'est pas un vote : manifeste ton intérêt, sans engagement d'achat.
         Les autres créations restent en compétition pour le prochain drop Love&Faith.
       </p>
     </div>
@@ -106,39 +112,6 @@ function VotePanel({ creation, status, results, onVote }) {
   );
 }
 
-function Gallery({ creation }) {
-  const [zoom, setZoom] = useState(null);
-  const items = [
-    { key: 'front', label: 'Devant', src: creation.mockups.front },
-    { key: 'back', label: creation.garment.prints.back || creation.mockupsAreCovers ? 'Dos' : 'Dos (uni)', src: creation.mockups.back },
-  ];
-  return (
-    <section className={styles.gallery} aria-labelledby="gallery-title">
-      <h2 id="gallery-title" className={styles.sectionTitle}>
-        {creation.mockupsAreCovers ? 'Les couvertures du Tome I' : 'Le T-shirt, devant et dos'}
-      </h2>
-      <div className={styles.galleryGrid}>
-        {items.map((it) => (
-          <figure key={it.key} className={styles.figure}>
-            <button type="button" className={`${styles.figureBtn} ${creation.mockupsAreCovers ? styles.figureFramed : ''}`}
-              onClick={() => setZoom(it)} aria-label={`Agrandir — ${it.label}`}>
-              <img src={it.src} alt={`${creation.name} — ${it.label.toLowerCase()}`} loading="lazy" decoding="async"
-                className={styles.floating} />
-            </button>
-            <figcaption>{it.label}</figcaption>
-          </figure>
-        ))}
-      </div>
-      <Modal isOpen={Boolean(zoom)} onClose={() => setZoom(null)}>
-        {zoom && (
-          <img src={zoom.src} alt={`${creation.name} — ${zoom.label.toLowerCase()}`}
-            className={`${styles.zoomImg} ${creation.mockupsAreCovers ? styles.zoomFramed : ''}`} />
-        )}
-      </Modal>
-    </section>
-  );
-}
-
 const CreationDetail = () => {
   const { slug } = useParams();
   const creation = getCreation(slug);
@@ -146,22 +119,35 @@ const CreationDetail = () => {
   const viewerRef = useRef(null);
   const [voteFor, setVoteFor] = useState(null); // création figée à l'ouverture du formulaire
   const [preorderFor, setPreorderFor] = useState(null);
-  const [preorderCount, setPreorderCount] = useState(0);
+  const [preorderStep, setPreorderStep] = useState('information');
+  const [preorderCount, setPreorderCount] = useState(null);
+  const [preorderSession, setPreorderSession] = useState(0);
   const [params, setParams] = useSearchParams();
   const [can3D] = useState(hasWebGL);
-  const [viewMode, setViewMode] = useViewMode();
+  const [viewMode, setViewMode] = useViewMode(slug);
+  useIdlePrefetch3D(viewMode === '2d');
 
   const openVote = useCallback(() => creation && setVoteFor(creation), [creation]);
   const closeVote = useCallback(() => setVoteFor(null), []);
-  const openPreorder = useCallback(() => creation && setPreorderFor(creation), [creation]);
-  const closePreorder = useCallback(() => setPreorderFor(null), []);
+  const openPreorder = useCallback(() => {
+    if (!creation) return;
+    setPreorderSession((current) => current + 1);
+    setPreorderStep('information');
+    setPreorderFor(creation);
+  }, [creation]);
+  const closePreorder = useCallback(() => {
+    setPreorderStep('information');
+    setPreorderFor(null);
+  }, []);
 
   useEffect(() => {
     if (!creation || !creation.isCurrentDrop) return;
     let active = true;
     fetchPreorderCount().then((res) => {
-      if (active) setPreorderCount(res.count || 0);
-    }).catch(() => undefined);
+      if (active) setPreorderCount(Number.isInteger(res.count) ? res.count : undefined);
+    }).catch(() => {
+      if (active) setPreorderCount(undefined);
+    });
     return () => { active = false; };
   }, [creation]);
 
@@ -194,18 +180,18 @@ const CreationDetail = () => {
           <div className={styles.modeBar}>
             <ViewModeToggle mode={viewMode} onChange={setViewMode} can3D={can3D} />
           </div>
-          {viewMode === '3d' ? (
+          {viewMode === '2d' ? (
+            <div className={`${styles.viewerPane} ${styles.viewerPane2d}`} key="v2d">
+              <MockupView creation={creation} />
+            </div>
+          ) : (
             <div className={styles.viewerPane} key="v3d">
-              <Suspense fallback={<div className={styles.viewerLoading}>Chargement…</div>}>
+              <Suspense fallback={<div className={styles.viewerLoading} role="status">Chargement de la figurine 3D…</div>}>
                 <GarmentViewer ref={viewerRef} creation={creation} enableZoom={false} />
               </Suspense>
               <button type="button" className={styles.recenter} onClick={() => viewerRef.current?.reset()}>
                 ⟲ Recentrer
               </button>
-            </div>
-          ) : (
-            <div className={`${styles.viewerPane} ${styles.viewerPane2d}`} key="v2d">
-              <MockupView creation={creation} />
             </div>
           )}
         </div>
@@ -242,8 +228,6 @@ const CreationDetail = () => {
         )}
       </div>
 
-      <Gallery creation={creation} />
-
       <nav className={styles.pager} aria-label="Autres créations">
         <Link to={`/propager/${prev.slug}`} className={styles.pagerLink}>
           <span>← Précédente</span>
@@ -266,13 +250,42 @@ const CreationDetail = () => {
         )}
       </Modal>
 
-      <Modal isOpen={Boolean(preorderFor)} onClose={closePreorder}>
-        {preorderFor && (
+      <Modal
+        isOpen={Boolean(preorderFor)}
+        onClose={closePreorder}
+        labelledBy={preorderStep === 'information' ? 'preorder-info-title' : 'preorder-form-title'}
+        className={styles.preorderModal}
+      >
+        {preorderFor && preorderStep === 'information' && (
+          <section className={styles.preorderInfo} aria-labelledby="preorder-info-title">
+            <p className={styles.kicker}>DROP #01 — BATMAN</p>
+            <h2 id="preorder-info-title" className={styles.preorderInfoTitle}>PLUS ON EST NOMBREUX, MOINS ON PAIE.</h2>
+            <p>
+              Le prix dépendra du nombre de personnes intéressées et des conditions de production.
+              En vous signalant, vous nous aidez à estimer les quantités et à négocier au mieux.
+            </p>
+            <div className={styles.priceRange}>
+              <strong>25 € — 35 €</strong>
+              <span>Fourchette de prix envisagée, non définitive.</span>
+            </div>
+            <p>
+              Le prix définitif et les modalités de livraison seront communiqués avant toute commande.
+              Vous ne payez rien maintenant : ce formulaire recueille uniquement votre intérêt.
+            </p>
+            <div className={styles.preorderInfoActions}>
+              <button type="button" className={styles.voteBtn} onClick={() => setPreorderStep('form')}>
+                Je souhaite participer
+              </button>
+              <button type="button" className={styles.preorderDismiss} onClick={closePreorder}>Pas maintenant</button>
+            </div>
+          </section>
+        )}
+        {preorderFor && preorderStep === 'form' && (
           <PreorderForm
-            key={preorderFor.slug}
+            key={`${preorderFor.slug}-${preorderSession}`}
             creation={preorderFor}
             onSubmitted={(count) => {
-              setPreorderCount(count || preorderCount);
+              if (Number.isInteger(count)) setPreorderCount(count);
             }}
             onClose={closePreorder}
           />

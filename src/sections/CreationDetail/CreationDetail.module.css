@@ -264,6 +264,77 @@
   font-size: 0.9rem;
 }
 
+.preorderModal {
+  width: min(620px, 100%);
+  border-color: rgba(255, 49, 77, 0.55);
+  background:
+    radial-gradient(ellipse at 85% 0, rgba(164, 0, 27, 0.2), transparent 46%),
+    linear-gradient(180deg, #170507, #080203);
+}
+
+.preorderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  color: rgba(255, 255, 255, 0.84);
+  line-height: 1.65;
+}
+
+.preorderInfoTitle {
+  max-width: 13ch;
+  font-family: var(--font-title);
+  font-size: clamp(1.8rem, 5vw, 2.7rem);
+  font-style: italic;
+  font-weight: 900;
+  line-height: 1.02;
+}
+
+.priceRange {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px;
+  border: 1px solid rgba(255, 49, 77, 0.48);
+  border-radius: var(--radius-lg);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.priceRange strong {
+  font-family: var(--font-title);
+  font-size: clamp(2rem, 7vw, 3rem);
+  font-style: italic;
+  line-height: 1;
+  color: var(--color-white);
+}
+
+.priceRange span {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.preorderInfoActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: var(--space-sm);
+}
+
+.preorderInfoActions .voteBtn {
+  justify-content: center;
+  min-height: 54px;
+  font-family: var(--font-title);
+  font-style: italic;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.preorderDismiss {
+  min-height: 48px;
+  color: var(--text-muted);
+}
+
+.preorderDismiss:hover { color: var(--color-white); }
+
 .secondaryBtn {
   align-self: flex-start;
   padding: 10px 20px;
@@ -368,4 +439,12 @@
 @media (max-width: 560px) {
   .galleryGrid { grid-template-columns: 1fr; }
   .page { gap: var(--space-2xl); }
+  .preorderModal {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-height: 100dvh;
+    border-radius: 0;
+    padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+  }
 }

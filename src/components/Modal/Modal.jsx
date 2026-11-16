@@ -8,7 +8,7 @@ import styles from './Modal.module.css';
  */
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([tabindex="-1"]), select, textarea, [tabindex]:not([tabindex="-1"])';
 
-const Modal = ({ isOpen, onClose, labelledBy, children }) => {
+const Modal = ({ isOpen, onClose, labelledBy, className, children }) => {
   const panelRef = useRef(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -46,7 +46,7 @@ const Modal = ({ isOpen, onClose, labelledBy, children }) => {
     <div className={styles.overlay} onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}>
       <div
         ref={panelRef}
-        className={styles.panel}
+        className={[styles.panel, className].filter(Boolean).join(' ')}
         role="dialog"
         aria-modal="true"
         aria-labelledby={labelledBy}

@@ -1,6 +1,7 @@
 /**
  * Histoires des créations — contenu éditorial indépendant des composants.
- * Textes PROVISOIRES rédigés à partir des histoires de référence fournies (29/10/2026).
+ * Textes rédigés à partir des histoires de référence fournies (29/10/2026) ;
+ * Fabulous Love&Faith, LVA et PLVA réécrites le 14/11/2026 selon les intentions de la marque.
  * Pour modifier un texte : éditer uniquement ce fichier.
  *
  * - `story`   : paragraphes affichés sur la fiche détaillée
@@ -9,11 +10,13 @@
  */
 export const CREATION_STORIES = {
   'fabulous-love-and-faith': {
-    message: "La chance n'est pas notre fondation. L'amour et la foi le sont.",
+    message: "La chance c'est pour les chanceux, nous on veut braquer le casino.",
     story: [
-      "Fabulous Love&Faith est née d'une mentalité : celle qui refuse d'attendre que la chance lui sourie. L'idée nous vient de l'univers du casino tel qu'il apparaît dans « Ateyaba » de Joke — ne pas espérer le jackpot, aller le chercher.",
-      "Nous avons repris cette idée pour la transformer à notre manière. Le casino devient une métaphore de la vie : plutôt que de miser sur le hasard, nous choisissons notre façon de vivre.",
-      "Notre véritable mise, c'est l'amour. Notre force, c'est la foi. Et si nous devons décrocher le jackpot, ce sera en restant fidèles à ces valeurs.",
+      "Fabulous Love&Faith tient tout entière dans une phrase, empruntée à l'univers de Joke et de son morceau « Casino » : « La chance c'est pour les chanceux, nous on veut braquer le casino. »",
+      "Au casino, tout le monde attend la même chose : que la roue tourne du bon côté. On mise, on espère, on regarde le hasard décider à notre place. Quelques-uns repartent gagnants, la plupart repartent les mains vides, et presque tous ont passé la nuit à attendre.",
+      "Braquer le casino, dans notre bouche, n'a rien à voir avec la triche. C'est refuser de rester assis à la table en attendant son tour. C'est préparer son coup pendant des mois, apprendre, se tromper, recommencer, jusqu'à ouvrir des portes qui, au départ, ne nous étaient pas destinées.",
+      "La chance n'est pas notre stratégie. Notre stratégie, c'est le travail, la détermination et la foi. Le travail, parce que rien de ce qui compte ne tombe du ciel. La détermination, parce que les résultats mettent souvent plus de temps que prévu à arriver. La foi, parce qu'il faut continuer à croire que ce que l'on sème aujourd'hui finira par pousser, même quand rien ne sort encore de terre.",
+      "Porter Fabulous Love&Faith, c'est assumer cette manière d'avancer : ne pas attendre que les opportunités se présentent, mais les provoquer. Laisser la chance aux chanceux, et garder pour soi l'effort, la patience et la conviction que tout cela finira par payer.",
     ],
   },
   'heart-of-ice': {
@@ -35,21 +38,23 @@ export const CREATION_STORIES = {
     ],
   },
   lva: {
-    message: "Love&Faith est une communauté réunie autour de valeurs communes, pas simplement une marque de vêtements.",
+    message: "Vivre d'amour sans attendre de retour. Vivre de foi sans cesser d'avancer.",
     story: [
-      "LVA signifie « Les Vrais Amoureux ». C'est le T-shirt originel de Love&Faith, celui qui porte l'essence même du projet.",
-      "Son identité repose sur ce qui est inscrit au dos. Le porter, ce n'est pas afficher un logo : c'est afficher une manière de voir le monde et les relations humaines.",
-      "Les vrais amoureux ne sont pas seulement ceux qui ressentent une émotion intense. Ce sont ceux qui agissent selon leurs valeurs, respectent les autres et font de l'amour quelque chose qui se voit dans leurs actes.",
-      "Ce T-shirt est une déclaration d'appartenance à cette philosophie.",
+      "LVA signifie « Les Vrais Amoureux ». C'est le T-shirt originel de Love&Faith, celui par lequel tout a commencé, et il porte au dos la phrase qui résume la marque : « All about Love and Faith ».",
+      "L'amour, d'abord. Les vrais amoureux ne donnent pas pour recevoir. Ils aiment, respectent, aident et font le bien autour d'eux sans tenir de comptes. Ce n'est pas de la naïveté, c'est un choix. Et ce choix finit toujours par rapporter quelque chose : dans nos relations, dans notre regard sur les choses, dans la personne que l'on devient.",
+      "La foi, ensuite. Vivre de foi, c'est accepter que tout ne dépende pas de nous. Certaines choses nous échappent, et il faut savoir les confier entre les mains de Celui en qui nous croyons. Mais la foi n'est pas une raison de rester immobile : elle se vit en marchant. Nous faisons ce qui dépend de nous, travailler, avancer, construire, et nous laissons le reste entre les mains de Dieu.",
+      "L'amour nous guide dans notre manière de vivre avec les autres. La foi nous guide dans notre manière d'avancer malgré les incertitudes. L'un ne va pas sans l'autre.",
+      "Porter LVA, c'est déclarer son appartenance à cette philosophie. Pas un logo : une manière de vivre.",
     ],
-    todo: 'Compléter la liste exacte des valeurs inscrites au dos du vêtement.',
   },
   plva: {
-    message: "Être un véritable amoureux est une manière d'aborder la vie, pas seulement une manière de parler de ses sentiments.",
+    message: "Certains amours ne sont pas parfaits. Ils sont vrais, et c'est pour cela qu'ils laissent une trace.",
     story: [
-      "PLVA signifie « Pour les Vrais Amoureux ». Cette création s'inspire d'une phrase associée au morceau « Juste une minute » de Hamza.",
-      "Elle porte notre vision de l'amour : remettre les sentiments, la sincérité et la profondeur des relations au centre de notre manière de vivre.",
-      "L'amour ne devrait pas se réduire à une apparence, à une consommation ou à un sentiment de surface. Il mérite que l'on prenne le temps de comprendre ce que l'on ressent, ce que l'on donne et ce que l'on construit avec les autres.",
+      "PLVA signifie « Pour les Vrais Amoureux ». Cette création s'inspire de la phrase associée au morceau « Juste une minute » de Hamza, et de tout ce qu'elle remue.",
+      "Elle parle d'un amour qui ne ressemble pas aux cartes postales. Un amour intense, passionnel, parfois toxique. Celui qui fait du bien et du mal en même temps, que l'on voudrait quitter une minute et retrouver la suivante. Celui qui rend fier et vulnérable à la fois.",
+      "Ce n'est pas un amour que l'on conseille. C'est un amour que l'on traverse. Il bouleverse, il contredit ce que l'on croyait savoir de soi, il prend plus de place qu'on ne l'aurait voulu. Et même lorsqu'il s'éteint, il ne disparaît jamais complètement.",
+      "PLVA n'est pas une déclaration romantique. C'est un hommage à cette intensité-là : à celles et ceux qui ont aimé au point d'en être marqués, et qui savent que les plus grandes histoires ne sont pas toujours les plus simples.",
+      "Pour les vrais amoureux : celles et ceux qui ont aimé pour de vrai, avec tout ce que cela coûte.",
     ],
   },
   'world-love': {
