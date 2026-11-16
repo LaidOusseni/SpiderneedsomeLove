@@ -11,9 +11,12 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from '../constants/supabaseConfig';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Projet fixé dans src/constants/supabaseConfig.js (les variables VITE_SUPABASE_* ne sont plus lues :
+// sur Vercel elles pointaient vers un ancien projet supprimé, ce qui bloquait votes, classement et précommandes).
+const supabaseUrl = SUPABASE_URL;
+const supabaseAnonKey = SUPABASE_PUBLISHABLE_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn(

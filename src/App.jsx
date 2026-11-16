@@ -18,6 +18,8 @@ const LegalNotice = lazy(() => import('./sections/LegalNotice/LegalNotice'));
 const Unsubscribe = lazy(() => import('./sections/Unsubscribe/Unsubscribe'));
 
 const ENTERED_KEY = 'lf-entered';
+// Recettes automatiques uniquement : passer l'intro (le visiteur, lui, la voit à chaque lancement du site)
+const SKIP_INTRO_KEY = 'lf-skip-intro';
 const DIRECT_PATHS = ['/confidentialite', '/mentions-legales', '/newsletter/desinscription'];
 
 // Robots d'indexation et d'aperçu de liens : ils ne cliquent pas sur « Cliquez ici ». L'intro (vidéo plein écran) est
@@ -27,7 +29,7 @@ const isCrawler = () => typeof navigator !== 'undefined' && CRAWLER_UA.test(navi
 
 function readEntered() {
   try {
-    return sessionStorage.getItem(ENTERED_KEY) === '1';
+    return sessionStorage.getItem(SKIP_INTRO_KEY) === '1';
   } catch {
     return false;
   }
@@ -75,9 +77,9 @@ function ScrollToTop() {
 function Site() {
   const location = useLocation();
   const navigate = useNavigate();
-  // L'intro s'affiche à la première visite de la session, quelle que soit l'URL d'arrivée,
-  // et toujours sur « / ». On n'entre dans le site que par le bouton « Cliquez ici ».
-  const [entered, setEntered] = useState(() => isCrawler() || (readEntered() && location.pathname !== '/'));
+  // L'intro (et son son de démarrage) s'affiche à chaque lancement ou rechargement du site, quelle que soit l'URL
+  // d'arrivée ; la navigation interne ne la rejoue pas. On n'entre dans le site que par le bouton « Cliquer ici ».
+  const [entered, setEntered] = useState(() => isCrawler() || readEntered());
 
   const handleEnter = useCallback(() => {
     try { sessionStorage.setItem(ENTERED_KEY, '1'); } catch { /* navigation privée */ }

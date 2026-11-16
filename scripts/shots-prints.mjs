@@ -24,7 +24,7 @@ const browser = await puppeteer.launch({
 try {
   const page = await browser.newPage();
   await page.evaluateOnNewDocument(() => {
-    sessionStorage.setItem('lf-entered', '1');
+    sessionStorage.setItem('lf-skip-intro', '1');
     localStorage.setItem('lf-view-mode', '3d');
   });
   await page.setViewport({ width: 1100, height: 900 });

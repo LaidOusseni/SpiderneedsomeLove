@@ -89,7 +89,7 @@ try {
   const page = await browser.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
-  await page.evaluateOnNewDocument(() => { sessionStorage.setItem('lf-entered', '1'); localStorage.setItem('lf-view-mode', '2d'); });
+  await page.evaluateOnNewDocument(() => { sessionStorage.setItem('lf-skip-intro', '1'); localStorage.setItem('lf-view-mode', '2d'); });
   await mockSupabase(page);
   await page.setViewport({ width: 1440, height: 900 });
 
@@ -233,7 +233,7 @@ try {
 
   // ── 13. VRAI projet Supabase (sans interception) ──
   const real = await browser.newPage();
-  await real.evaluateOnNewDocument(() => sessionStorage.setItem('lf-entered', '1'));
+  await real.evaluateOnNewDocument(() => sessionStorage.setItem('lf-skip-intro', '1'));
   await real.goto(BASE + '/chemin', { waitUntil: 'networkidle2' });
   await wait(2500);
   const rt = await text(real);

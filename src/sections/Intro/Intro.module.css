@@ -270,3 +270,25 @@
   .logo { height: min(34vh, 300px); }
   .cta { padding: 14px 32px; }
 }
+
+/* Affiché seulement si le navigateur a bloqué le son de démarrage */
+.soundButton {
+  position: absolute;
+  top: max(16px, env(safe-area-inset-top));
+  right: 16px;
+  z-index: 6;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+  background: rgba(10, 2, 4, 0.72);
+  color: #fff;
+  font: 600 0.9rem/1 'Poppins', sans-serif;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  animation: soundPulse 1.6s ease-in-out infinite;
+}
+.soundButton:hover,
+.soundButton:focus-visible { background: rgba(140, 8, 24, 0.85); outline: none; }
+@keyframes soundPulse { 50% { box-shadow: 0 0 0 6px rgba(255, 31, 61, 0.25); } }
+@media (prefers-reduced-motion: reduce) { .soundButton { animation: none; } }

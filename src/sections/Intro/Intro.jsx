@@ -19,25 +19,37 @@ const INTRO_SOUND = '/sound/intro-startup.mp3';
 const SOUND_VOLUME = 0.7;
 
 /**
- * Son de démarrage : joué uniquement pendant l'intro, coupé en fondu quand on entre dans le site.
- * Si le navigateur bloque la lecture automatique avec son, elle démarre au premier geste sur l'intro.
+ * Son de démarrage : lancé dès l'ouverture de l'intro (pendant le logo titre), coupé en fondu quand on entre.
+ * Les navigateurs peuvent bloquer un son lancé sans geste du visiteur : on le signale alors (`blocked`) pour
+ * afficher « Activer le son », et le premier toucher sur l'intro le lance aussi.
  */
 function useIntroSound() {
   const audioRef = useRef(null);
   const stoppedRef = useRef(false);
+  const [blocked, setBlocked] = useState(false);
+
+  const start = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio || stoppedRef.current || !audio.paused) return;
+    audio.play().then(() => setBlocked(false), () => setBlocked(true));
+  }, []);
 
   useEffect(() => {
     const audio = new Audio(INTRO_SOUND);
     audio.preload = 'auto';
     audio.volume = SOUND_VOLUME;
     audioRef.current = audio;
+    stoppedRef.current = false;
     const events = ['pointerdown', 'keydown', 'touchstart'];
     const unlock = (event) => {
-      events.forEach((e) => window.removeEventListener(e, unlock, true));
       if (event?.target?.closest?.('[data-intro-enter]')) return; // le clic d'entrée ne déclenche pas le son
-      if (!stoppedRef.current && audio.paused) audio.play().catch(() => {});
+      events.forEach((e) => window.removeEventListener(e, unlock, true));
+      start();
     };
-    audio.play().catch(() => events.forEach((e) => window.addEventListener(e, unlock, { capture: true, passive: true })));
+    audio.play().then(() => setBlocked(false), () => {
+      setBlocked(true);
+      events.forEach((e) => window.addEventListener(e, unlock, { capture: true, passive: true }));
+    });
     return () => {
       events.forEach((e) => window.removeEventListener(e, unlock, true));
       stoppedRef.current = true;
@@ -45,22 +57,25 @@ function useIntroSound() {
       audio.removeAttribute('src');
       audio.load();
     };
-  }, []);
+  }, [start]);
 
-  return useCallback((duration) => {
+  const fadeOut = useCallback((duration) => {
     stoppedRef.current = true;
+    setBlocked(false);
     const audio = audioRef.current;
     if (!audio || audio.paused) return;
-    const start = audio.volume;
+    const from = audio.volume;
     const t0 = performance.now();
     const step = (now) => {
       const k = Math.min(1, (now - t0) / duration);
-      audio.volume = Math.max(0, start * (1 - k));
+      audio.volume = Math.max(0, from * (1 - k));
       if (k < 1) requestAnimationFrame(step);
       else audio.pause();
     };
     requestAnimationFrame(step);
   }, []);
+
+  return { blocked, start, fadeOut };
 }
 
 const Intro = ({ onEnter }) => {
@@ -69,7 +84,7 @@ const Intro = ({ onEnter }) => {
   const [logoFailed, setLogoFailed] = useState(() => !hasWebGL());
   const leaving = useRef(false);
   const buttonRef = useRef(null);
-  const fadeOutSound = useIntroSound();
+  const { blocked: soundBlocked, start: startSound, fadeOut: fadeOutSound } = useIntroSound();
 
   useEffect(() => {
     if (!['title', 'phrase', 'phraseExit', 'logo3d'].includes(phase)) return undefined;
@@ -171,6 +186,12 @@ const Intro = ({ onEnter }) => {
           </button>
         </div>
       </div>
+
+      {soundBlocked && phase !== 'leaving' && (
+        <button type="button" className={styles.soundButton} onClick={startSound}>
+          <span aria-hidden="true">🔊</span> Activer le son
+        </button>
+      )}
 
       <div className={styles.transition} aria-hidden="true" />
     </section>

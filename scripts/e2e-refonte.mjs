@@ -109,7 +109,7 @@ async function newPage(viewport) {
   page.errors = [];
   page.on('pageerror', (e) => page.errors.push(e.message));
   page.on('console', (m) => m.type() === 'error' && !/Failed to load resource/.test(m.text()) && page.errors.push(m.text()));
-  await page.evaluateOnNewDocument(() => { try { sessionStorage.setItem('lf-entered', '1'); } catch { /* about:blank */ } });
+  await page.evaluateOnNewDocument(() => { try { sessionStorage.setItem('lf-skip-intro', '1'); } catch { /* about:blank */ } });
   await page.setRequestInterception(true);
   page.on('request', (req) => {
     if (/stripe|checkout|payment/i.test(req.url())) paymentCalls++;

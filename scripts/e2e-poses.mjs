@@ -14,7 +14,7 @@ const SHOTS = process.env.SHOTS_DIR ?? 'D:\\dev-cache\\tmp\\lf-shots\\poses';
 const CHROME_PROFILE = process.env.CHROME_PROFILE ?? 'D:\\dev-cache\\tmp\\chrome-runs';
 const CHROME = process.env.CHROME_PATH ?? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const PAGE = process.env.POSE_PAGE ?? '/propager/heart-of-ice';
-const ENTERED_KEY = 'lf-entered';
+const ENTERED_KEY = 'lf-skip-intro';
 fs.mkdirSync(SHOTS, { recursive: true });
 fs.mkdirSync(CHROME_PROFILE, { recursive: true });
 

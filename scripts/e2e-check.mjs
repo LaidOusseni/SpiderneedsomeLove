@@ -228,7 +228,7 @@ try {
     }
     return req.continue();
   });
-  await vp.evaluateOnNewDocument(() => sessionStorage.setItem('lf-entered', '1'));
+  await vp.evaluateOnNewDocument(() => sessionStorage.setItem('lf-skip-intro', '1'));
   await vp.goto(`${BASE}/propager/world-love`, { waitUntil: 'networkidle0' });
   await wait(1500);
   const voteBtn = await vp.$('button[class*="voteBtn"]');
