@@ -1,0 +1,84 @@
+/* Popup plus large que les formulaires, défilement interne, bouton « J'ai compris » toujours accessible */
+.panel {
+  width: min(720px, 100%);
+  max-height: calc(100dvh - 24px);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
+.inner { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+
+.head {
+  flex: none;
+  padding: clamp(18px, 4vw, 30px) 64px 14px clamp(18px, 4vw, 30px);
+  border-bottom: 1px solid rgba(255, 31, 61, 0.25);
+}
+.kicker { font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--color-red-glow); }
+.title {
+  margin-top: 4px;
+  font-family: var(--font-title);
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  line-height: 1.1;
+  color: var(--color-white);
+}
+.updated { margin-top: 6px; font-size: 0.78rem; color: var(--text-muted); }
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px clamp(18px, 4vw, 30px) 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  color: var(--text-secondary, var(--text-primary));
+  font-size: 0.92rem;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.body h2 {
+  font-family: var(--font-title);
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--color-white);
+  margin-bottom: 8px;
+}
+.body section p + p { margin-top: 8px; }
+.body ul { margin: 8px 0; padding-left: 1.2em; list-style: disc; }
+.body li { margin: 4px 0; }
+.body li::marker { color: var(--color-red-glow); }
+.body a { color: var(--color-red-glow); text-decoration: underline; text-underline-offset: 3px; }
+.body a:hover { color: var(--color-white); }
+
+.footer {
+  flex: none;
+  padding: 14px clamp(18px, 4vw, 30px) max(16px, env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(255, 31, 61, 0.25);
+  display: flex;
+  justify-content: flex-end;
+}
+.ok {
+  min-height: 48px;
+  padding: 0 28px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: linear-gradient(180deg, #d4002a, #8a0010);
+  color: var(--color-white);
+  font-family: var(--font-title);
+  font-style: italic;
+  font-weight: 900;
+  font-size: 1rem;
+  box-shadow: var(--glow-red);
+  cursor: pointer;
+}
+.ok:hover, .ok:focus-visible { filter: brightness(1.12); outline: none; }
+
+@media (max-width: 520px) {
+  .ok { width: 100%; }
+}

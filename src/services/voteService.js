@@ -8,6 +8,8 @@
  *   - get_drop_overview() : statut du drop + nombre de votes par création (aucune donnée personnelle)
  *   - drop_vote_totals    : vue du classement des candidates (lecture seule, aucune donnée personnelle)
  *   - cast_vote(...)      : enregistre un vote après contrôle côté serveur (table drop_votes)
+ *   - cast_vote_tracked(...) / get_my_votes(token) : même vote + créations déjà votées par ce visiteur
+ *     (migration 20261117120000 ; repli automatique sur cast_vote si elle n'est pas encore appliquée)
  */
 
 import { supabase } from './supabase';
@@ -138,17 +140,17 @@ export async function castVote({ creationSlug, firstName, lastName, instagram, w
   if (!ig.ok) return { ok: false, code: 'invalid_instagram', message: ig.error };
   if (!supabase) return { ok: false, code: 'unavailable', message: MESSAGES.unavailable };
 
+  const params = {
+    p_creation_slug: creationSlug,
+    p_first_name: first,
+    p_last_name: last,
+    p_instagram: instagram.trim(),
+    p_website: website || null,
+  };
   let res;
   try {
-    res = await withTimeout(
-      supabase.rpc('cast_vote', {
-        p_creation_slug: creationSlug,
-        p_first_name: first,
-        p_last_name: last,
-        p_instagram: instagram.trim(),
-        p_website: website || null,
-      }),
-    );
+    res = await withTimeout(supabase.rpc('cast_vote_tracked', { ...params, p_voter_token: readVoterToken() }));
+    if (res.error && isMissingFunction(res.error)) res = await withTimeout(supabase.rpc('cast_vote', params));
   } catch (err) {
     const code = err?.name === 'AbortError' ? 'timeout' : 'network';
     return { ok: false, code, message: MESSAGES[code] };
@@ -165,5 +167,41 @@ export async function castVote({ creationSlug, firstName, lastName, instagram, w
   }
 
   const r = res.data ?? {};
+  if (r.voter_token) writeVoterToken(r.voter_token);
   return { ok: Boolean(r.ok), code: r.code ?? 'server', votes: r.votes, message: r.ok ? '' : voteMessage(r.code) };
+}
+
+// ── Votes déjà effectués par ce visiteur ──
+// Le navigateur ne garde qu'un identifiant aléatoire remis par Supabase après un vote ; la liste des créations
+// votées est TOUJOURS relue dans Supabase (table drop_votes).
+const VOTER_TOKEN_KEY = 'lf-voter-token';
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function readVoterToken() {
+  try {
+    const t = localStorage.getItem(VOTER_TOKEN_KEY);
+    return t && UUID_RE.test(t) ? t : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeVoterToken(token) {
+  try { if (UUID_RE.test(token)) localStorage.setItem(VOTER_TOKEN_KEY, token); } catch { /* stockage indisponible */ }
+}
+
+/**
+ * Créations pour lesquelles ce visiteur a déjà voté, lues dans Supabase.
+ * @returns {Promise<string[]|null>} null si inconnu (pas encore voté sur cet appareil, ou service indisponible)
+ */
+export async function fetchMyVotes() {
+  const token = readVoterToken();
+  if (!token || !supabase) return null;
+  try {
+    const res = await withTimeout(supabase.rpc('get_my_votes', { p_voter_token: token }));
+    if (res.error || !res.data?.ok) return res.data?.code === 'unknown_voter' ? [] : null;
+    return Array.isArray(res.data.slugs) ? res.data.slugs : [];
+  } catch {
+    return null;
+  }
 }

@@ -344,7 +344,17 @@
   }
   .brand { grid-area: brand; }
   .logo { width: 64px; }
-  .label { grid-area: label; justify-self: end; width: min(172px, 100%); font-size: 0.5rem; }
+  /* Étiquette : largeur adaptée au texte (jamais de texte collé ou coupé par le cadre), texte centré */
+  .label {
+    grid-area: label;
+    justify-self: end;
+    width: max-content;
+    max-width: calc(100% - 8px); /* place pour l'ombre rouge décalée */
+    padding: 10px 16px 10px 26px;
+    font-size: 0.5rem;
+    text-align: center;
+  }
+  .labelBottom { justify-content: center; gap: 14px; letter-spacing: 0.12em; }
   .est { grid-area: est; justify-content: center; font-size: 0.74rem; letter-spacing: 0.2em; }
 
   .stage {

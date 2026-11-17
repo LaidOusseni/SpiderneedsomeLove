@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import styles from './CreationDetail.module.css';
 import { CANDIDATES, CREATIONS, getCreation } from '../../constants/creations';
 import { useVoteResults } from '../../context/VoteResultsContext';
@@ -49,6 +49,16 @@ function PreorderPanel({ creation, count, onOpen }) {
   );
 }
 
+/** Vote déjà enregistré pour cette création (vérifié dans Supabase) : remplace le bouton de vote. */
+function AlreadyVoted() {
+  return (
+    <p className={`${styles.voteBtn} ${styles.voteBtnDone}`} role="status">
+      <span className={styles.voteBtnLabel}>Vous avez déjà voté ❤️</span>
+      <span className={styles.voteBtnHint}>Merci ! Tu peux voter pour d'autres créations.</span>
+    </p>
+  );
+}
+
 function VotePanel({ creation, status, results, onVote }) {
   const standing = useMemo(() => {
     if (results.status !== 'ready') return null;
@@ -71,6 +81,7 @@ function VotePanel({ creation, status, results, onVote }) {
   }
 
   const votable = canVote(creation, results);
+  const alreadyVoted = results.hasVoted(creation.slug);
   return (
     <div className={`${styles.votePanel} ${status === 'winner' ? styles.winnerPanel : ''}`}>
       <h2 className={styles.voteTitle}>
@@ -93,7 +104,9 @@ function VotePanel({ creation, status, results, onVote }) {
         </p>
       )}
 
-      {votable ? (
+      {alreadyVoted ? (
+        <AlreadyVoted />
+      ) : votable ? (
         <button type="button" className={styles.voteBtn} onClick={onVote}>
           <span className={styles.voteBtnLabel}>Je choisis ce T-shirt</span>
           <span className={styles.voteBtnHint}>Faire entendre ma voix — gratuit, sans commande ni paiement</span>
@@ -143,8 +156,16 @@ const CreationDetail = () => {
   const [viewMode, setViewMode] = useViewMode(slug);
   useIdlePrefetch3D(viewMode === '2d');
 
-  const openVote = useCallback(() => creation && setVoteFor(creation), [creation]);
+  const navigate = useNavigate();
+  const alreadyVoted = creation ? results.hasVoted(creation.slug) : false;
+  // Un vote déjà enregistré pour cette création n'ouvre plus le formulaire
+  const openVote = useCallback(() => creation && !alreadyVoted && setVoteFor(creation), [creation, alreadyVoted]);
   const closeVote = useCallback(() => setVoteFor(null), []);
+  // Après la confirmation du vote : directement au classement actualisé (navigation interne, jamais l'intro)
+  const continueToRanking = useCallback(() => {
+    setVoteFor(null);
+    navigate('/chemin');
+  }, [navigate]);
   const openPreorder = useCallback(() => {
     if (!creation) return;
     setPreorderSession((current) => current + 1);
@@ -172,10 +193,11 @@ const CreationDetail = () => {
   const wantsVote = params.get('voter') === '1';
   const votableNow = creation ? canVote(creation, results) : false;
   useEffect(() => {
-    if (!wantsVote || results.status === 'loading') return;
-    if (votableNow) setVoteFor(creation);
+    // On attend aussi la vérification « déjà voté » dans Supabase avant d'ouvrir le formulaire
+    if (!wantsVote || results.status === 'loading' || !results.votedReady) return;
+    if (votableNow && !alreadyVoted) setVoteFor(creation);
     setParams({}, { replace: true });
-  }, [wantsVote, votableNow, results.status, creation, setParams]);
+  }, [wantsVote, votableNow, alreadyVoted, results.status, results.votedReady, creation, setParams]);
 
   if (!creation) return <Navigate to="/propager" replace />;
 
@@ -238,6 +260,8 @@ const CreationDetail = () => {
                 <span className={styles.voteBtnLabel}>Précommander</span>
                 <span className={styles.voteBtnHint}>Sans paiement, sans engagement</span>
               </button>
+            ) : alreadyVoted && status !== 'historic' ? (
+              <AlreadyVoted />
             ) : votableNow ? (
               <button type="button" className={styles.voteBtn} onClick={openVote}>
                 <span className={styles.voteBtnLabel}>Je choisis ce T-shirt</span>
@@ -291,6 +315,7 @@ const CreationDetail = () => {
             creation={voteFor}
             onVoted={results.applyVoteResult}
             onClose={closeVote}
+            onContinue={continueToRanking}
           />
         )}
       </Modal>

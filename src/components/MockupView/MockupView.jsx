@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './MockupView.module.css';
-import Modal from '../Modal/Modal';
+import { useModalLayer } from '../Modal/Modal';
 
 const SIDES = [
   { key: 'front', label: 'Devant' },
@@ -19,6 +20,37 @@ function Face({ creation, side, priority }) {
       loading="eager"
       fetchPriority={priority ? 'high' : undefined}
     />
+  );
+}
+
+/**
+ * Visionneuse plein écran : image entière (proportions d'origine) sur fond noir, croix toujours visible.
+ * Fermeture : croix, Échap ou clic / toucher à côté de l'image. Défilement de la page bloqué.
+ */
+function Lightbox({ creation, side, label, onClose }) {
+  const panelRef = useRef(null);
+  useModalLayer(true, panelRef, onClose);
+  return createPortal(
+    <div
+      ref={panelRef}
+      className={styles.lightbox}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${creation.name} — ${label}`}
+      tabIndex={-1}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <button type="button" className={styles.lightboxClose} onClick={onClose} aria-label="Fermer l'agrandissement">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+      </button>
+      <img
+        src={creation.mockups[side]}
+        alt={`${creation.name} — ${label.toLowerCase()}`}
+        className={styles.lightboxImg}
+        decoding="async"
+      />
+    </div>,
+    document.body,
   );
 }
 
@@ -58,15 +90,14 @@ const MockupView = ({ creation }) => {
         ))}
       </div>
 
-      <Modal isOpen={Boolean(zoom)} onClose={() => setZoom(null)}>
-        {zoom && (
-          <div className={styles.zoom} style={{ '--aspect': getAspectRatio(creation, zoom) }}>
-            <span className={styles.face} style={{ '--aspect': getAspectRatio(creation, zoom) }}>
-              <Face creation={creation} side={zoom} priority />
-            </span>
-          </div>
-        )}
-      </Modal>
+      {zoom && (
+        <Lightbox
+          creation={creation}
+          side={zoom}
+          label={sides.find((s) => s.key === zoom)?.label ?? ''}
+          onClose={() => setZoom(null)}
+        />
+      )}
     </div>
   );
 };

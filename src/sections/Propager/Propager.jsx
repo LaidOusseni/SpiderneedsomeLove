@@ -199,7 +199,9 @@ const Propager = () => {
                 <span className={styles.chooseLabel}>Cliquez pour choisir</span>
                 <span className={styles.chooseHint}>Découvrir son histoire{status === 'candidate' ? ' et voter' : ''}</span>
               </Link>
-              {canVote(selected, results) && (
+              {results.hasVoted(selected.slug) && status !== 'historic' && !selected.isCurrentDrop ? (
+                <p className={styles.voteLink} role="status">Vous avez déjà voté ❤️</p>
+              ) : canVote(selected, results) && (
                 <Link to={`/propager/${selected.slug}?voter=1`} className={styles.voteLink}>
                   Je vote pour cette création →
                 </Link>

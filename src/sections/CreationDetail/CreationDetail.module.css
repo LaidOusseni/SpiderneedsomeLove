@@ -242,6 +242,16 @@
 }
 .voteBtn:hover { box-shadow: var(--glow-red-strong); transform: translateY(-2px); }
 
+/* Vote déjà enregistré : même gabarit que le bouton, mais état (non cliquable) */
+.voteBtnDone,
+.voteBtnDone:hover {
+  text-align: center;
+  background: linear-gradient(180deg, rgba(120, 0, 18, 0.55), rgba(40, 0, 6, 0.75));
+  box-shadow: none;
+  transform: none;
+  cursor: default;
+}
+
 .voteBtnLabel {
   font-family: var(--font-title);
   font-style: italic;

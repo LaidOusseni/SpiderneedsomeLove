@@ -301,6 +301,7 @@
   transition: color var(--transition-fast);
 }
 .voteLink:hover, .voteLink:focus-visible { color: var(--color-white); }
+p.voteLink, p.voteLink:hover { text-decoration: none; color: var(--color-white); }
 
 .choose {
   display: flex;

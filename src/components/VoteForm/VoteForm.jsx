@@ -1,20 +1,21 @@
 import { useId, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import styles from './VoteForm.module.css';
 import { castVote } from '../../services/voteService';
 import { cleanName, validateInstagram } from '../../utils/instagram';
 import { VOTE_TEXTS } from '../../constants/site';
+import PrivacyModal from '../PrivacyModal/PrivacyModal';
 
 /**
  * Formulaire de vote pour UNE création.
  * Le slug est fixé à l'ouverture (prop `creation`) : le vote ne peut pas partir vers une autre création.
  * Le contrôle définitif (doublon, statut, fréquence) est fait par la base (cast_vote).
  */
-const VoteForm = ({ creation, onVoted, onClose }) => {
+const VoteForm = ({ creation, onVoted, onClose, onContinue }) => {
   const id = useId();
   const [fields, setFields] = useState({ firstName: '', lastName: '', instagram: '', website: '' });
   const [errors, setErrors] = useState({});
   const [state, setState] = useState({ phase: 'idle', message: '' }); // idle | sending | done | already | error
+  const [privacyOpen, setPrivacyOpen] = useState(false);
   const sending = useRef(false);
   const slug = useRef(creation.slug).current;
 
@@ -66,8 +67,8 @@ const VoteForm = ({ creation, onVoted, onClose }) => {
         <p className={styles.resultText}>{state.message}</p>
         <p className={styles.small}>Tu peux aussi voter pour d'autres créations qui te parlent.</p>
         <div className={styles.resultActions}>
-          <button type="button" className={styles.submit} onClick={onClose}>Continuer</button>
-          <Link to="/chemin" className={styles.link} onClick={onClose}>Voir le chemin de l'amour →</Link>
+          {/* Continuer : directement au classement actualisé (« Le chemin de l'amour »), sans relancer l'intro */}
+          <button type="button" className={styles.submit} onClick={onContinue ?? onClose}>Continuer</button>
         </div>
       </div>
     );
@@ -137,7 +138,9 @@ const VoteForm = ({ creation, onVoted, onClose }) => {
       <p className={styles.small}>{VOTE_TEXTS.rule}</p>
       <p className={styles.small}>
         {VOTE_TEXTS.why} Voir la{' '}
-        <Link to="/confidentialite" target="_blank" rel="noopener" className={styles.link}>politique de confidentialité</Link>.
+        <button type="button" className={`${styles.link} ${styles.linkButton}`} onClick={() => setPrivacyOpen(true)}>
+          politique de confidentialité
+        </button>.
       </p>
 
       {state.phase === 'error' && <p className={styles.formError} role="alert">{state.message}</p>}
@@ -145,6 +148,9 @@ const VoteForm = ({ creation, onVoted, onClose }) => {
       <button type="submit" className={styles.submit} disabled={sendingNow} aria-busy={sendingNow}>
         {sendingNow ? 'Enregistrement…' : `Confirmer mon vote pour ${creation.name}`}
       </button>
+
+      {/* Au-dessus du formulaire : les champs saisis sont conservés */}
+      <PrivacyModal isOpen={privacyOpen} onClose={() => setPrivacyOpen(false)} />
     </form>
   );
 };

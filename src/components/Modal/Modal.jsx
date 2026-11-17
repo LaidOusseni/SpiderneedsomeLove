@@ -5,22 +5,29 @@ import styles from './Modal.module.css';
 /**
  * Fenêtre modale accessible : Échap pour fermer, focus conservé dans la fenêtre,
  * retour du focus à l'élément d'origine à la fermeture, défilement de la page bloqué.
+ * Les fenêtres peuvent s'empiler (ex. politique de confidentialité au-dessus du formulaire de vote) :
+ * seule celle du dessus réagit au clavier, et la page reste bloquée tant qu'une fenêtre est ouverte.
  */
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([tabindex="-1"]), select, textarea, [tabindex]:not([tabindex="-1"])';
 
-const Modal = ({ isOpen, onClose, labelledBy, className, children }) => {
-  const panelRef = useRef(null);
+const layers = [];
+
+/** Couche modale : pile, blocage du défilement, Échap, piège du focus et restitution du focus. */
+export function useModalLayer(isOpen, panelRef, onClose) {
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
   useEffect(() => {
     if (!isOpen) return undefined;
+    const layer = {};
+    layers.push(layer);
     const previous = document.activeElement;
-    document.body.style.overflow = 'hidden';
+    if (layers.length === 1) document.body.style.overflow = 'hidden';
     const first = panelRef.current?.querySelector(FOCUSABLE);
-    (first ?? panelRef.current)?.focus();
+    (first ?? panelRef.current)?.focus({ preventScroll: true });
 
     const onKey = (e) => {
+      if (layers[layers.length - 1] !== layer) return; // une autre fenêtre est au-dessus
       if (e.key === 'Escape') {
         e.stopPropagation();
         onCloseRef.current?.();
@@ -35,10 +42,16 @@ const Modal = ({ isOpen, onClose, labelledBy, className, children }) => {
     document.addEventListener('keydown', onKey);
     return () => {
       document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = '';
-      previous?.focus?.();
+      layers.splice(layers.indexOf(layer), 1);
+      if (layers.length === 0) document.body.style.overflow = '';
+      previous?.focus?.({ preventScroll: true });
     };
-  }, [isOpen]);
+  }, [isOpen, panelRef]);
+}
+
+const Modal = ({ isOpen, onClose, labelledBy, className, children }) => {
+  const panelRef = useRef(null);
+  useModalLayer(isOpen, panelRef, onClose);
 
   if (!isOpen) return null;
 
@@ -60,6 +73,6 @@ const Modal = ({ isOpen, onClose, labelledBy, className, children }) => {
     </div>,
     document.body,
   );
-};
+}
 
 export default Modal;

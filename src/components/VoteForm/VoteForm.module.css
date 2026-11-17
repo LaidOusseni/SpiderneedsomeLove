@@ -119,6 +119,7 @@
   text-underline-offset: 3px;
 }
 .link:hover { color: var(--color-white); }
+.linkButton { padding: 0; border: 0; background: none; font: inherit; cursor: pointer; }
 
 .resultActions {
   display: flex;

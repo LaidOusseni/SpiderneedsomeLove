@@ -17,8 +17,16 @@ const CreationDetail = lazy(() => import('./sections/CreationDetail/CreationDeta
 const LegalNotice = lazy(() => import('./sections/LegalNotice/LegalNotice'));
 const Unsubscribe = lazy(() => import('./sections/Unsubscribe/Unsubscribe'));
 
-const ENTERED_KEY = 'lf-entered';
-// Recettes automatiques uniquement : passer l'intro (le visiteur, lui, la voit à chaque lancement du site)
+// ── Introduction : une seule lecture par visite ──
+// • sessionStorage (onglet) : une actualisation ou un changement de page ne la rejoue jamais ;
+// • localStorage (dernière activité) : fermer puis rouvrir le navigateur dans la foulée reste la même visite ;
+// • au-delà de VISIT_GAP_MS sans activité sur le site, c'est une nouvelle visite : l'intro se rejoue.
+// L'URL n'est jamais modifiée : on reste sur la page demandée (la barre d'adresse fait référence).
+const INTRO_DONE_KEY = 'lf-intro-done';
+const LAST_ACTIVE_KEY = 'lf-last-active';
+const VISIT_GAP_MS = 30 * 60 * 1000;
+const HEARTBEAT_MS = 60 * 1000;
+// Recettes automatiques uniquement : passer l'intro
 const SKIP_INTRO_KEY = 'lf-skip-intro';
 const DIRECT_PATHS = ['/confidentialite', '/mentions-legales', '/newsletter/desinscription'];
 
@@ -27,12 +35,38 @@ const DIRECT_PATHS = ['/confidentialite', '/mentions-legales', '/newsletter/desi
 const CRAWLER_UA = /bot|crawler|spider|slurp|googlebot|bingbot|yandex|baiduspider|duckduckbot|applebot|facebookexternalhit|facebot|twitterbot|linkedinbot|whatsapp|telegrambot|discordbot|pinterest|google-inspectiontool|chrome-lighthouse/i;
 const isCrawler = () => typeof navigator !== 'undefined' && CRAWLER_UA.test(navigator.userAgent || '');
 
-function readEntered() {
+function introAlreadySeen() {
   try {
-    return sessionStorage.getItem(SKIP_INTRO_KEY) === '1';
+    if (sessionStorage.getItem(SKIP_INTRO_KEY) === '1' || sessionStorage.getItem(INTRO_DONE_KEY) === '1') return true;
+    const last = Number(localStorage.getItem(LAST_ACTIVE_KEY));
+    return last > 0 && Date.now() - last < VISIT_GAP_MS;
   } catch {
-    return false;
+    return false; // stockage indisponible (navigation privée stricte) : l'intro se joue
   }
+}
+
+function markVisitActive() {
+  try {
+    sessionStorage.setItem(INTRO_DONE_KEY, '1');
+    localStorage.setItem(LAST_ACTIVE_KEY, String(Date.now()));
+  } catch { /* stockage indisponible */ }
+}
+
+/** Tant que le site est ouvert (et visible), la visite reste active ; mise à jour aussi en quittant la page. */
+function useVisitHeartbeat(active) {
+  useEffect(() => {
+    if (!active) return undefined;
+    markVisitActive();
+    const beat = () => document.visibilityState === 'visible' && markVisitActive();
+    const id = setInterval(beat, HEARTBEAT_MS);
+    document.addEventListener('visibilitychange', markVisitActive);
+    window.addEventListener('pagehide', markVisitActive);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', markVisitActive);
+      window.removeEventListener('pagehide', markVisitActive);
+    };
+  }, [active]);
 }
 
 /**
@@ -77,12 +111,13 @@ function ScrollToTop() {
 function Site() {
   const location = useLocation();
   const navigate = useNavigate();
-  // L'intro (et son son de démarrage) s'affiche à chaque lancement ou rechargement du site, quelle que soit l'URL
-  // d'arrivée ; la navigation interne ne la rejoue pas. On n'entre dans le site que par le bouton « Cliquer ici ».
-  const [entered, setEntered] = useState(() => isCrawler() || readEntered());
+  // L'intro (et son son de démarrage) se joue une fois par visite, quelle que soit l'URL d'arrivée ; ensuite,
+  // ni la navigation ni une actualisation ne la rejouent. On n'entre dans le site que par le bouton « Cliquer ici ».
+  const [entered, setEntered] = useState(() => isCrawler() || introAlreadySeen());
+  useVisitHeartbeat(entered);
 
   const handleEnter = useCallback(() => {
-    try { sessionStorage.setItem(ENTERED_KEY, '1'); } catch { /* navigation privée */ }
+    markVisitActive();
     if (location.pathname === '/') navigate('/propager', { replace: true });
     setEntered(true);
   }, [location.pathname, navigate]);

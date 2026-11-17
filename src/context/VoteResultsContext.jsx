@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { fetchDropOverview } from '../services/voteService';
+import { fetchDropOverview, fetchMyVotes } from '../services/voteService';
 
 /**
  * Résultats partagés par toutes les pages (cohérence des compteurs) :
@@ -13,6 +13,15 @@ const VoteResultsContext = createContext(null);
 export function VoteResultsProvider({ children }) {
   const [state, setState] = useState({ status: 'loading', drop: null, bySlug: {} });
   const inFlight = useRef(null);
+  // Créations déjà votées par ce visiteur, relues dans Supabase (jamais déduites du seul stockage local)
+  const [votedSlugs, setVotedSlugs] = useState(() => new Set());
+  const [votedReady, setVotedReady] = useState(false); // réponse de Supabase reçue (ou rien à vérifier)
+
+  const refreshMyVotes = useCallback(async () => {
+    const slugs = await fetchMyVotes();
+    if (slugs) setVotedSlugs(new Set(slugs));
+    setVotedReady(true);
+  }, []);
 
   const refresh = useCallback(async () => {
     if (inFlight.current) return inFlight.current;
@@ -37,6 +46,13 @@ export function VoteResultsProvider({ children }) {
 
   useEffect(() => {
     refresh();
+    refreshMyVotes();
+    const onVisible = () => document.visibilityState === 'visible' && refreshMyVotes();
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [refresh, refreshMyVotes]);
+
+  useEffect(() => {
     const tick = () => document.visibilityState === 'visible' && refresh();
     const id = setInterval(tick, REFRESH_MS);
     document.addEventListener('visibilitychange', tick);
@@ -46,17 +62,23 @@ export function VoteResultsProvider({ children }) {
     };
   }, [refresh]);
 
-  /** Mise à jour immédiate d'un compteur renvoyé par cast_vote, puis resynchronisation. */
+  /** Mise à jour immédiate d'un compteur renvoyé par cast_vote, puis resynchronisation (compteurs + votes du visiteur). */
   const applyVoteResult = useCallback((slug, votes) => {
+    setVotedSlugs((prev) => (prev.has(slug) ? prev : new Set(prev).add(slug)));
+    refreshMyVotes();
     if (typeof votes === 'number') {
       setState((prev) =>
         prev.bySlug[slug] ? { ...prev, bySlug: { ...prev.bySlug, [slug]: { ...prev.bySlug[slug], votes } } } : prev,
       );
     }
     refresh();
-  }, [refresh]);
+  }, [refresh, refreshMyVotes]);
 
-  const value = useMemo(() => ({ ...state, refresh, applyVoteResult }), [state, refresh, applyVoteResult]);
+  const hasVoted = useCallback((slug) => votedSlugs.has(slug), [votedSlugs]);
+  const value = useMemo(
+    () => ({ ...state, refresh, applyVoteResult, votedSlugs, votedReady, hasVoted }),
+    [state, refresh, applyVoteResult, votedSlugs, votedReady, hasVoted],
+  );
   return <VoteResultsContext.Provider value={value}>{children}</VoteResultsContext.Provider>;
 }
 

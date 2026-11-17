@@ -6,14 +6,9 @@ import { PRIVACY } from '../../constants/privacy';
  * Politique de confidentialité — décrit exactement les données traitées par le site :
  * vote communautaire (Supabase), newsletter (Supabase), préférences d'affichage (stockage du navigateur).
  */
-const Privacy = () => (
-  <article className={styles.page} aria-labelledby="privacy-title">
-    <header className={styles.head}>
-      <p className={styles.kicker}>Love&amp;Faith</p>
-      <h1 id="privacy-title" className={styles.title}>Politique de confidentialité</h1>
-      <p className={styles.updated}>Dernière mise à jour : {PRIVACY.updatedAt}</p>
-    </header>
-
+/** Contenu de la politique (page /confidentialite et popup du formulaire de vote). */
+export const PrivacySections = () => (
+  <>
     <section>
       <h2>Qui est responsable de tes données ?</h2>
       <p>
@@ -96,6 +91,18 @@ const Privacy = () => (
         Tu peux aussi adresser une réclamation à la CNIL (cnil.fr).
       </p>
     </section>
+  </>
+);
+
+const Privacy = () => (
+  <article className={styles.page} aria-labelledby="privacy-title">
+    <header className={styles.head}>
+      <p className={styles.kicker}>Love&amp;Faith</p>
+      <h1 id="privacy-title" className={styles.title}>Politique de confidentialité</h1>
+      <p className={styles.updated}>Dernière mise à jour : {PRIVACY.updatedAt}</p>
+    </header>
+
+    <PrivacySections />
 
     <p className={styles.back}><Link to="/propager">← Retour aux créations</Link></p>
   </article>
