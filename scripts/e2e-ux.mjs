@@ -12,6 +12,7 @@ import { PGlite } from '@electric-sql/pglite';
 import { pgcrypto } from '@electric-sql/pglite/contrib/pgcrypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { MUSIC_TRACKS } from '../src/constants/music.js';
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:4173';
 const TEMP_DIR = process.env.LF_TMP ?? 'D:\\dev-cache\\tmp';
@@ -78,6 +79,11 @@ async function handle(req) {
       const [sql, params] = RPC[rpc](JSON.parse(req.postData() || '{}'));
       const { rows } = await asAnon(sql, params, `198.51.100.${ipCounter}`);
       return json(200, rows[0].r);
+    }
+    // Bibliothèque « Le son de l'amour » (chargée par le lecteur sur toutes les pages)
+    if (url.pathname.endsWith('/rest/v1/music_tracks')) {
+      return json(200, MUSIC_TRACKS.map((t, i) => ({ id: t.id, artist: t.artist, title: t.title, file_path: t.src, mime_type: t.type,
+        cover_path: t.cover, duration_seconds: t.duration, position: i + 1 })));
     }
     if (url.pathname.endsWith('/rest/v1/drop_vote_totals')) {
       const cols = (url.searchParams.get('select') ?? '*').split(',').map((c) => c.trim()).filter((c) => /^[a-z_]+$/.test(c));

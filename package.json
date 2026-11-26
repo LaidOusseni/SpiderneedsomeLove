@@ -17,7 +17,8 @@
     "mockups:cutout": "node scripts/cutout-mockups.mjs",
     "check:refonte": "node scripts/e2e-refonte.mjs",
     "figurine:optimize": "node scripts/figurine/optimize-glb.mjs",
-    "seo:assets": "node scripts/seo-assets.mjs"
+    "seo:assets": "node scripts/seo-assets.mjs",
+    "music:import": "node scripts/music-import.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",

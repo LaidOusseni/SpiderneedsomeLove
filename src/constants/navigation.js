@@ -14,6 +14,16 @@ export const NAV_LINKS = [
     label: "Suivez le chemin de l'amour",
     path: '/chemin',
   },
+  {
+    id: 'jouer',
+    label: "Jouer avec l'amour",
+    path: '/jouer',
+  },
+  {
+    id: 'son',
+    label: "Le son de l'amour",
+    path: '/son',
+  },
 ];
 
 // Anciennes URL de la V1 → nouvelles routes

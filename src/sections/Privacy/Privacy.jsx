@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import styles from './Privacy.module.css';
 import { PRIVACY } from '../../constants/privacy';
+import AnalyticsChoice from '../../components/AnalyticsChoice/AnalyticsChoice';
 
 /**
  * Politique de confidentialité — décrit exactement les données traitées par le site :
@@ -76,10 +77,43 @@ export const PrivacySections = () => (
     </section>
 
     <section>
+      <h2>Mesure d'audience</h2>
+      <p>
+        Pour comprendre comment le site est utilisé (pages consultées, temps passé, utilisation du jeu et du lecteur
+        musical), nous enregistrons des statistiques anonymes dans notre base Supabase : la page vue, le type d'appareil
+        (téléphone, tablette ou ordinateur), le morceau écouté et la durée d'écoute, l'ouverture du jeu et, si le jeu les
+        transmet, le score et le mode de fin de partie.
+      </p>
+      <p>
+        Ces statistiques sont rattachées à un identifiant aléatoire créé dans ton navigateur (renouvelé tous les 13 mois),
+        qui ne contient ni ton nom, ni ton e-mail, ni ton adresse IP. Aucun cookie, aucun service de mesure tiers, aucune
+        publicité et aucun suivi d'un site à l'autre. Seul l'administrateur Love&amp;Faith consulte les résultats, sous
+        forme de chiffres agrégés. Durée de conservation : 25 mois.
+      </p>
+      <p>
+        Si ton navigateur envoie le signal « Do Not Track » ou « Global Privacy Control », aucune statistique n'est
+        enregistrée. Tu peux aussi refuser la mesure d'audience à tout moment :
+      </p>
+      <AnalyticsChoice />
+    </section>
+
+    <section>
+      <h2>Jouer avec l'amour (51 Wheeling)</h2>
+      <p>
+        Le jeu 51 Wheeling est édité par 5HC et fonctionne depuis son site officiel, 51games.fr, affiché dans la page
+        « Jouer avec l'amour ». Lorsque tu ouvres cette page, ton navigateur se connecte à 51games.fr, qui gère ses propres
+        comptes, classements, achats et données selon ses propres conditions. Love&amp;Faith ne reçoit aucune de ces
+        informations, hormis les événements de jeu anonymes décrits ci-dessus.
+      </p>
+    </section>
+
+    <section>
       <h2>Stockage dans ton navigateur</h2>
       <p>
-        Le site ne dépose aucun cookie publicitaire ni de mesure d'audience. Il mémorise seulement, dans ton navigateur,
-        que tu as déjà vu l'introduction (le temps de ta visite).
+        Le site ne dépose aucun cookie publicitaire. Il mémorise seulement, dans ton navigateur : que tu as déjà vu
+        l'introduction et l'heure de ta dernière activité (pour ne pas la rejouer pendant ta visite), l'identifiant
+        aléatoire de mesure d'audience (sauf si tu l'as refusée), le réglage de volume du lecteur musical et, après un
+        vote, un identifiant aléatoire qui permet d'afficher les créations pour lesquelles tu as déjà voté.
       </p>
     </section>
 

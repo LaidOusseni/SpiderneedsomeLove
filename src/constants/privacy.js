@@ -4,7 +4,7 @@
  * seuls ces éléments relèvent d'une décision de la marque.
  */
 export const PRIVACY = {
-  updatedAt: '14 novembre 2026',
+  updatedAt: '25 novembre 2026',
   // La forme juridique et l'entité responsable restent à confirmer par Love&Faith.
   controller: 'Love&Faith',
   contact: { label: 'Instagram @allaboutloveandfaith', url: 'https://www.instagram.com/allaboutloveandfaith' },

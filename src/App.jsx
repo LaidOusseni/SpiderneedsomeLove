@@ -9,6 +9,9 @@ import Privacy from './sections/Privacy/Privacy';
 import SiteFooter from './components/SiteFooter/SiteFooter';
 import { VoteResultsProvider } from './context/VoteResultsContext';
 import RouteSeo from './components/RouteSeo/RouteSeo';
+import RouteAnalytics from './components/RouteAnalytics/RouteAnalytics';
+import MiniPlayer from './components/MiniPlayer/MiniPlayer';
+import { MusicPlayerProvider } from './context/MusicPlayerContext';
 import AsciiLogoBackground from './components/AsciiLogoBackground/AsciiLogoBackground';
 import { LEGACY_REDIRECTS } from './constants/navigation';
 import styles from './App.module.css';
@@ -16,6 +19,9 @@ import styles from './App.module.css';
 const CreationDetail = lazy(() => import('./sections/CreationDetail/CreationDetail'));
 const LegalNotice = lazy(() => import('./sections/LegalNotice/LegalNotice'));
 const Unsubscribe = lazy(() => import('./sections/Unsubscribe/Unsubscribe'));
+const Game = lazy(() => import('./sections/Game/Game'));
+const Music = lazy(() => import('./sections/Music/Music'));
+const Admin = lazy(() => import('./sections/Admin/Admin'));
 
 // ── Introduction : une seule lecture par visite ──
 // • sessionStorage (onglet) : une actualisation ou un changement de page ne la rejoue jamais ;
@@ -28,7 +34,7 @@ const VISIT_GAP_MS = 30 * 60 * 1000;
 const HEARTBEAT_MS = 60 * 1000;
 // Recettes automatiques uniquement : passer l'intro
 const SKIP_INTRO_KEY = 'lf-skip-intro';
-const DIRECT_PATHS = ['/confidentialite', '/mentions-legales', '/newsletter/desinscription'];
+const DIRECT_PATHS = ['/confidentialite', '/mentions-legales', '/newsletter/desinscription', '/admin'];
 
 // Robots d'indexation et d'aperçu de liens : ils ne cliquent pas sur « Cliquez ici ». L'intro (vidéo plein écran) est
 // donc passée pour eux afin qu'ils lisent le même contenu que le visiteur voit juste après l'intro.
@@ -130,6 +136,7 @@ function Site() {
       <AsciiLogoBackground />
       <ScrollToTop />
       <RouteSeo />
+      <RouteAnalytics />
       <a href="#contenu" className={styles.skip}>Aller au contenu</a>
       <NavBar />
       <main id="contenu" className={styles.main}>
@@ -140,6 +147,9 @@ function Site() {
             <Route path="/propager/:slug" element={<CreationDetail />} />
             <Route path="/a-propos" element={<About />} />
             <Route path="/chemin" element={<Journey />} />
+            <Route path="/jouer" element={<Game />} />
+            <Route path="/son" element={<Music />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="/confidentialite" element={<Privacy />} />
             <Route path="/mentions-legales" element={<LegalNotice />} />
             <Route path="/newsletter/desinscription" element={<Unsubscribe />} />
@@ -151,6 +161,7 @@ function Site() {
         </Suspense>
       </main>
       <SiteFooter />
+      <MiniPlayer />
     </div>
   );
 }
@@ -159,7 +170,9 @@ function App() {
   return (
     <BrowserRouter>
       <VoteResultsProvider>
-        <Site />
+        <MusicPlayerProvider>
+          <Site />
+        </MusicPlayerProvider>
       </VoteResultsProvider>
     </BrowserRouter>
   );

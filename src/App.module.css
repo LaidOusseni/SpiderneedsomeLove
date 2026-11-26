@@ -10,6 +10,9 @@
   animation: siteIn 0.9s ease both;
 }
 
+/* Mode immersif du jeu (iPhone) : sans le filtre d'animation, le lecteur « fixe » couvre bien tout l'écran */
+:global(html.lf-site-settled) .site { animation: none; }
+
 @keyframes siteIn {
   from { opacity: 0; filter: brightness(0.2); }
   to { opacity: 1; filter: none; }

@@ -1,0 +1,173 @@
+/* Le son de l'amour — fond rouge et noir, tourne-disque au centre (maquette PDF p. 2) */
+.page {
+  position: relative;
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: clamp(16px, 3vw, 40px) var(--section-px) var(--space-4xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xl);
+  overflow-x: clip;
+}
+.page::before {
+  content: '';
+  position: absolute;
+  inset: -80px -40vw 0;
+  z-index: -1;
+  background: radial-gradient(ellipse 55% 48% at 50% 34%, rgba(150, 10, 24, 0.75), rgba(69, 0, 0, 0.45) 45%, transparent 75%);
+  pointer-events: none;
+}
+
+.srOnly {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.player { display: flex; flex-direction: column; align-items: center; gap: clamp(14px, 2.4vw, 26px); }
+
+/* Artiste et titre réels, centrés */
+.now { display: flex; align-items: center; justify-content: center; gap: 14px; min-height: 64px; max-width: 100%; text-align: center; }
+.nowCover { width: 56px; height: 56px; border-radius: 10px; border: 1.5px solid rgba(255, 255, 255, 0.7); object-fit: cover; flex: none; box-shadow: var(--glow-red); }
+.nowText { min-width: 0; }
+.nowArtist {
+  font-family: var(--font-title);
+  font-weight: 900;
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  line-height: 1.05;
+  color: var(--color-white);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+}
+.nowTitle {
+  margin-top: 4px;
+  font-family: var(--font-title);
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(1.05rem, 2.6vw, 1.4rem);
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.deck { width: min(100%, 600px); filter: drop-shadow(0 26px 40px rgba(0, 0, 0, 0.65)) drop-shadow(0 0 30px rgba(201, 0, 37, 0.35)); }
+.turntable { display: block; width: 100%; height: auto; }
+
+/* Vinyle : 33⅓ tours/min, vitesse constante ; à l'arrêt, il garde sa position */
+.vinyl { animation: spin 1.8s linear infinite; animation-play-state: paused; will-change: transform; }
+.spinning { animation-play-state: running; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.ringText { font: 700 13px var(--font-body); letter-spacing: 2.2px; fill: #ffe9ec; }
+
+/* Bras : repos sur son support, pose sur le disque à la lecture */
+.arm { transition: transform 0.9s var(--ease-out); transform: rotate(0deg); }
+.armOn { transform: rotate(28deg); }
+.glow { transition: opacity 0.6s ease; }
+.fader, .led { transition: all 0.4s ease; }
+
+/* ── Commandes ── */
+.controls { width: min(100%, 460px); display: flex; flex-direction: column; align-items: center; gap: 14px; }
+
+.progressRow { width: 100%; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.time { font-variant-numeric: tabular-nums; font-size: 0.85rem; color: var(--text-muted); min-width: 3.2ch; text-align: center; }
+
+.progress, .volume {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 32px; /* zone tactile */
+  background: transparent;
+  cursor: pointer;
+  --track: linear-gradient(90deg, #e3192f 0 var(--pct, 0%), #f4ede9 var(--pct, 0%) 100%);
+}
+.progress::-webkit-slider-runnable-track, .volume::-webkit-slider-runnable-track { height: 5px; border-radius: 5px; background: var(--track); }
+.progress::-moz-range-track, .volume::-moz-range-track { height: 5px; border-radius: 5px; background: var(--track); }
+.progress::-webkit-slider-thumb, .volume::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px; margin-top: -5.5px; border-radius: 50%;
+  background: #fff; border: 3px solid #e3192f; box-shadow: 0 0 0 4px rgba(255, 31, 61, 0.2);
+}
+.progress::-moz-range-thumb, .volume::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 3px solid #e3192f; }
+.progress:disabled { cursor: default; opacity: 0.55; }
+.progress:focus-visible, .volume:focus-visible { outline: none; }
+.progress:focus-visible::-webkit-slider-thumb, .volume:focus-visible::-webkit-slider-thumb { box-shadow: var(--focus-ring); }
+
+.buttons { display: flex; align-items: center; justify-content: center; gap: clamp(28px, 8vw, 56px); }
+.skip, .playBtn, .mute { display: grid; place-items: center; border: 0; cursor: pointer; color: #fff; background: none; -webkit-tap-highlight-color: transparent; }
+.skip { width: 56px; height: 56px; border-radius: 50%; transition: transform var(--transition-fast), background var(--transition-fast); }
+.skip:hover { background: rgba(255, 255, 255, 0.08); }
+.skip:active { transform: scale(0.92); }
+.skip .icon { width: 40px; height: 40px; }
+.playBtn {
+  width: 76px; height: 76px; border-radius: 50%;
+  background: #fff; color: #b30c1f;
+  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.12), 0 10px 30px rgba(0, 0, 0, 0.5), var(--glow-red);
+  transition: transform var(--transition-fast), box-shadow var(--transition-base);
+}
+.playBtn:hover { box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.16), 0 10px 30px rgba(0, 0, 0, 0.5), var(--glow-red-strong); }
+.playBtn:active { transform: scale(0.94); }
+.playBtn .icon { width: 36px; height: 36px; }
+.skip:focus-visible, .playBtn:focus-visible, .mute:focus-visible, .trackBtn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.icon { fill: currentColor; }
+.iconStroke { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+.volumeRow { width: min(100%, 240px); display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px; }
+.mute { width: 44px; height: 44px; border-radius: 50%; color: var(--text-muted); }
+.mute:hover { color: #fff; }
+
+.error { padding: 10px 14px; border-radius: var(--radius-md); background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 31, 61, 0.5); font-size: 0.9rem; text-align: center; }
+
+/* ── Bibliothèque ── */
+.library { width: min(100%, 760px); margin: 0 auto; }
+.libraryTitle { font-family: var(--font-title); font-style: italic; font-weight: 900; font-size: clamp(1.6rem, 4vw, 2.2rem); color: #fff; text-align: center; }
+.libraryIntro { margin-top: 6px; text-align: center; color: var(--text-muted); font-size: 0.9rem; }
+.list { list-style: none; margin-top: var(--space-lg); display: grid; gap: 8px; }
+.trackBtn {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 34px 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 8px 14px 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-lg);
+  background: rgba(18, 4, 6, 0.72);
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+.trackBtn:hover { border-color: rgba(255, 255, 255, 0.45); background: rgba(60, 4, 10, 0.75); }
+.trackActive { border-color: #fff; background: linear-gradient(90deg, rgba(150, 10, 24, 0.75), rgba(40, 3, 7, 0.8)); box-shadow: var(--glow-red); }
+.trackNum { font-variant-numeric: tabular-nums; font-size: 0.85rem; color: var(--text-muted); text-align: center; }
+.trackCover { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; }
+.trackDisc {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: radial-gradient(circle, #fff 0 3px, #120203 3.5px 9px, #c8102a 9.5px 100%);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+.trackText { display: flex; flex-direction: column; min-width: 0; }
+.trackTitle { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trackArtist { font-size: 0.82rem; color: var(--text-muted); }
+.trackTime { font-variant-numeric: tabular-nums; font-size: 0.85rem; color: var(--text-muted); }
+
+.eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; }
+.eq i { width: 3px; background: #ff3355; border-radius: 1px; animation: eq 0.9s ease-in-out infinite; }
+.eq i:nth-child(2) { animation-delay: 0.2s; }
+.eq i:nth-child(3) { animation-delay: 0.4s; }
+@keyframes eq { 0%, 100% { height: 4px; } 50% { height: 14px; } }
+
+/* ── Téléphone : tourne-disque centré, commandes au pouce, sans défilement horizontal ── */
+@media (max-width: 600px) {
+  .page { gap: var(--space-2xl); padding-top: 12px; }
+  .deck { width: 100%; }
+  .now { min-height: 56px; gap: 10px; }
+  .nowCover { width: 48px; height: 48px; }
+  .buttons { gap: 36px; }
+  .trackBtn { grid-template-columns: 26px 40px minmax(0, 1fr) auto; gap: 10px; padding-inline: 8px 12px; }
+  .trackCover, .trackDisc { width: 40px; height: 40px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vinyl { animation-duration: 6s; } /* le disque tourne plus doucement, sans s'arrêter */
+  .arm, .glow { transition: none; }
+  .eq i { animation: none; height: 10px; }
+}

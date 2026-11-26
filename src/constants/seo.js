@@ -44,6 +44,22 @@ const STATIC_ROUTES = {
     priority: '0.8',
     changefreq: 'daily',
   },
+  '/jouer': {
+    title: "Jouer avec l'amour — 51 Wheeling x Love&Faith",
+    description:
+      'Joue à 51 Wheeling, le jeu de wheeling 3D de Zaher (5HC), sur Love&Faith (Love and Faith) et découvre '
+      + "l'événement spécial Love&Faith avec le code 5HC.",
+    priority: '0.7',
+    changefreq: 'weekly',
+  },
+  '/son': {
+    title: "Le son de l'amour — Musique des Lovers | Love&Faith",
+    description:
+      "Le tourne-disque Love&Faith (Love and Faith) : écoute les morceaux des Lovers — MWL, Rakeem, Cooper, Barty — "
+      + "dans « Le son de l'amour ».",
+    priority: '0.7',
+    changefreq: 'weekly',
+  },
   '/confidentialite': {
     title: 'Politique de confidentialité — Love&Faith',
     description: 'Comment Love&Faith (Love and Faith) collecte, utilise et protège tes données personnelles.',
@@ -59,7 +75,7 @@ const STATIC_ROUTES = {
 };
 
 /** Pages à ne pas indexer (liens personnels envoyés par e-mail). */
-const NOINDEX = ['/newsletter/desinscription'];
+const NOINDEX = ['/newsletter/desinscription', '/admin'];
 
 function creationSeo(c) {
   const label = c.isCurrentDrop ? 'drop actuel, précommandes ouvertes' : c.status === 'historic' ? 'ancien drop' : 'création candidate au prochain drop';
